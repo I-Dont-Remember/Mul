@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.mul">
 
     <!-- Required for Nearby Connections -->
@@ -8,6 +9,9 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.TETHER_PRIVILEGE" />
 
     <application
         android:allowBackup="true"
@@ -16,6 +20,18 @@
         android:roundIcon="@mipmap/mul_icon"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <service
+            android:name=".HotSpotIntentService"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver android:name=".receiver.HotSpotIntentReceiver" android:enabled="true" android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.mul.TURN_ON"/>
+                <action android:name="com.example.mul.TURN_OFF"/>
+            </intent-filter>
+        </receiver>
+
         <activity android:name=".ClientActivity"
             android:parentActivityName=".MainActivity"></activity>
         <activity android:name=".ProviderActivity"
