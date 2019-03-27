@@ -178,13 +178,8 @@ public class ClientActivity extends AppCompatActivity {
     }
 
     public void connect(View v) {
-
-        mBluetoothAdapter.setName("sdf");
-
-        //Intent serverIntent = new Intent(ClientActivity.this, DiscoverDevices.class);
-        //startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
-
-
+        Intent serverIntent = new Intent(ClientActivity.this, DiscoverDevices.class);
+        startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
     }
 
     public void stopConnection(View v){
