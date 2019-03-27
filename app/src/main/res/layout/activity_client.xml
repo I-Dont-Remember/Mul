@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
@@ -11,4 +10,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="I'm the Client" />
+
+    <Button
+        android:id="@+id/startConnection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="connect"
+        android:text="Start Connection" />
+
+    <Button
+        android:id="@+id/stopConnection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="stopConnection"
+        android:text="Stop Connection" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status:" />
 </LinearLayout>
