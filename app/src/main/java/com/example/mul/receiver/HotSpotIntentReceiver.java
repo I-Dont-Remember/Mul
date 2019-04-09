@@ -17,9 +17,10 @@ public class HotSpotIntentReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         final String ACTION_TURNON = context.getString(R.string.intent_action_turnon);
         final String ACTION_TURNOFF = context.getString(R.string.intent_action_turnoff);
-        Log.i(TAG,"Received intent");
+
         if (intent != null) {
             final String action = intent.getAction();
+            Log.i(TAG,"Received intent with action: " + action);
 
             if (ACTION_TURNON.equals(action)) {
                 MagicActivity.useMagicActivityToTurnOn(context);

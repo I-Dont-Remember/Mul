@@ -32,6 +32,7 @@ public class MyOreoWifiManager {
     }
 
     public void startTethering(MyOnStartTetheringCallback callback, Handler handler){
+        Log.i(TAG, "starting tethering");
 
         CallbackMaker cm = new CallbackMaker(mContext, callback);
         Class<?> mSystemCallbackClazz = cm.getCallBackClass();
@@ -86,6 +87,7 @@ public class MyOreoWifiManager {
 
 
     public void stopTethering() {
+        Log.i(TAG, "stop tethering");
 
         ConnectivityManager manager = (ConnectivityManager) mContext.getApplicationContext().getSystemService(ConnectivityManager.class );
 

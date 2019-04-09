@@ -51,14 +51,6 @@ public class MainActivity extends PermissionsActivity {
 //        sendImplicitBroadcast(this,intent);
 //    }
 
-    public void onClickTurnOnData(View v){
-        MagicActivity.useMagicActivityToTurnOn(this);
-    }
-
-    public void onClickTurnOffData(View v){
-        MagicActivity.useMagicActivityToTurnOff(this);
-    }
-
     private static void sendImplicitBroadcast(Context ctxt, Intent i) {
         PackageManager pm=ctxt.getPackageManager();
         List<ResolveInfo> matches=pm.queryBroadcastReceivers(i, 0);

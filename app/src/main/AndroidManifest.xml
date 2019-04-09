@@ -47,6 +47,19 @@
             android:name=".DiscoverDevices"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/select_device" />
+
+
+        <activity
+            android:name=".MagicActivity">
+            <intent-filter>
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <data android:scheme="wifihotspot" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

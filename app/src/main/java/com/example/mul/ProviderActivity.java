@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -44,6 +45,8 @@ public class ProviderActivity extends AppCompatActivity {
 
     // Member object for the chat services
     private BTCommunicationService BTService = null;
+
+    private String TAG = ProviderActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +125,7 @@ public class ProviderActivity extends AppCompatActivity {
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {
+            Log.i(TAG, "Bluetooth mHandler");
             switch (msg.what) {
                 case MESSAGE_WRITE:
                     byte[] writeBuf = (byte[]) msg.obj;
@@ -154,6 +158,7 @@ public class ProviderActivity extends AppCompatActivity {
     };
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i(TAG, "onActivityResult");
         switch (requestCode) {
             case REQUEST_CONNECT_DEVICE:
                 // When DeviceListActivity returns with a device to connect
@@ -182,6 +187,7 @@ public class ProviderActivity extends AppCompatActivity {
     }
 
     public void connect(View v) {
+        Log.i(TAG, "connecting bluetooth");
 
         if (BTService.getState() == BTCommunicationService.STATE_CONNECTED) {
             Toast.makeText(this, "Already Connected", Toast.LENGTH_LONG);

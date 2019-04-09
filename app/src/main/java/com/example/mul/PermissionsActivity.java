@@ -11,6 +11,7 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 /**
  * Created by jonro on 31/03/2018.
@@ -23,6 +24,8 @@ public abstract class PermissionsActivity extends AppCompatActivity {
 
     private boolean mLocationPermission = false;
     private boolean mSettingPermission = true;
+
+    private String TAG = PermissionsActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +42,8 @@ public abstract class PermissionsActivity extends AppCompatActivity {
 
 
     private void settingPermission() {
+        Log.i(TAG, "settingPermissions");
+
         mSettingPermission = true;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -52,6 +57,7 @@ public abstract class PermissionsActivity extends AppCompatActivity {
 
 
     private void locationsPermission(){
+        Log.i(TAG, "location permssion");
         mLocationPermission = true;
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -81,6 +87,7 @@ public abstract class PermissionsActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i(TAG, "on activity result");
         // Check which request we're responding to
         if (requestCode == MY_PERMISSIONS_MANAGE_WRITE_SETTINGS) {
             // Make sure the request was successful

@@ -158,8 +158,8 @@ public class HotSpotIntentService extends IntentService {
             MyOnStartTetheringCallback callback = new MyOnStartTetheringCallback() {
                 @Override
                 public void onTetheringStarted() {
-                    startForeground(FOREGROUND_ID,
-                            buildForegroundNotification());
+                    //startForeground(FOREGROUND_ID,
+                    //        buildForegroundNotification());
                 }
 
                 @Override

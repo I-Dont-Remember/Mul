@@ -19,7 +19,10 @@ public class Client_Provider_Common {
     private WifiConfiguration conf;
     private Random rand = new Random();
 
+    private String TAG = Client_Provider_Common.class.getSimpleName();
+
     public void sendMessage1(String message, BTCommunicationService BTService, StringBuffer mOutStringBuffer, Context context) {
+        Log.i(TAG, "sendMesssage1: " + message);
         // Check that we're actually connected before trying anything
         if (BTService.getState() != BTCommunicationService.STATE_CONNECTED) {
             Toast.makeText(context, R.string.not_connected, Toast.LENGTH_SHORT).show();
@@ -36,6 +39,7 @@ public class Client_Provider_Common {
     }
 
     public void ensureDiscoverable(BluetoothAdapter mBluetoothAdapter, Context context) {
+        Log.i(TAG, "ensureDiscoverable");
 
         mBluetoothAdapter.setName(rand.nextInt() + "MulTooth" + rand.nextInt());
 
@@ -49,6 +53,7 @@ public class Client_Provider_Common {
 
 
     public void connectToWifi(String wifiPair, Context context){
+        Log.i(TAG, "connectToWifi");
         //The wifiPair will come in the form of <SSID>.<password>
 
         //Break down the wifiPair string into the individual parts
@@ -88,6 +93,7 @@ public class Client_Provider_Common {
     }
 
     public void forgetCurrentNetwork(Context context){
+        Log.i(TAG, "forgetCurrentNetwork");
         wifiManager.setWifiEnabled(false);
 
         List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();

@@ -1,6 +1,7 @@
 package com.example.mul;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.android.dx.Code;
 import com.android.dx.DexMaker;
@@ -25,7 +26,10 @@ public final class CallbackMaker {
     Class<?> myTetheringCallbackClazz;
     DexMaker dexMaker;
 
+    private String TAG = CallbackMaker.class.getSimpleName();
+
     public CallbackMaker(Context c, MyOnStartTetheringCallback callback){
+        Log.i(TAG, "in constructor");
         mContext = c;
         mAppCallBack = callback;
 
@@ -76,6 +80,7 @@ public final class CallbackMaker {
     }
 
     public void generateConstructorWorking(TypeId<?> declaringType, TypeId<?> superType){
+        Log.i(TAG, "trying to generate constructor");
         final MethodId<?, ?> superConstructor = superType.getConstructor();
 
         MethodId<?, ?> constructor = declaringType.getConstructor(TypeId.INT);
@@ -85,55 +90,56 @@ public final class CallbackMaker {
         constructorCode.returnVoid();
     }
 
+//
+//    /**
+//     *
+//     * @param declaringType
+//     * @param superType
+//     * @param appCallbackFieldId
+//     */
+//    public void generateConstructor(TypeId<?> declaringType, TypeId<?> superType, FieldId<?,?> appCallbackFieldId){
+//        final MethodId<?, ?> superConstructor = superType.getConstructor();
+//        TypeId<?> myCallbackTypeId = TypeId.get(MyOnStartTetheringCallback.class);
+//
+//        MethodId<?, ?> constructor = declaringType.getConstructor(myCallbackTypeId);
+//        Code constructorCode = dexMaker.declare(constructor, Modifier.PUBLIC);
+//        final Local thisRef = constructorCode.getThis(declaringType);
+//        constructorCode.invokeDirect(superConstructor, null, thisRef);
+//        // constructorCode.iput(appCallbackFieldId, thisRef, param);
+//        constructorCode.returnVoid();
+//    }
+//
+//
+//
+//
+//    public void generateCallbackMethod(TypeId<?> declaringType, FieldId<?,?> appCallbackFieldId, String method){
+//        // Identify the 'onTetheringStarted()' method on declaringType.
+//        MethodId onTetheringStarted = declaringType.getMethod(TypeId.VOID, method);
+//
+//        // Declare that method on the dexMaker. Use the returned Code instance
+//        // as a builder that we can append instructions to.
+//        Code code = dexMaker.declare(onTetheringStarted, Modifier.PUBLIC);
+//        // ref this this instance
+//        final Local thisRef = code.getThis(declaringType);
+//
+//
+//        TypeId declaringTypeCallback = appCallbackFieldId.getDeclaringType();
+//        Local appCallback = code.newLocal(declaringTypeCallback);
+//
+//        //get reference to the field
+//        code.iget(appCallbackFieldId,appCallback , thisRef);
+//
+//        // Call method on field.
+//        MethodId methodIdInAppCallback =  declaringTypeCallback.getMethod(TypeId.VOID, method, TypeId.VOID);
+//        code.invokeVirtual(methodIdInAppCallback, null,appCallback , null);
+//
+//        // return;
+//        code.returnVoid();
+//
+//    }
 
-    /**
-     *
-     * @param declaringType
-     * @param superType
-     * @param appCallbackFieldId
-     */
-    public void generateConstructor(TypeId<?> declaringType, TypeId<?> superType, FieldId<?,?> appCallbackFieldId){
-        final MethodId<?, ?> superConstructor = superType.getConstructor();
-        TypeId<?> myCallbackTypeId = TypeId.get(MyOnStartTetheringCallback.class);
 
-        MethodId<?, ?> constructor = declaringType.getConstructor(myCallbackTypeId);
-        Code constructorCode = dexMaker.declare(constructor, Modifier.PUBLIC);
-        final Local thisRef = constructorCode.getThis(declaringType);
-        constructorCode.invokeDirect(superConstructor, null, thisRef);
-        // constructorCode.iput(appCallbackFieldId, thisRef, param);
-        constructorCode.returnVoid();
-    }
-
-
-
-
-    public void generateCallbackMethod(TypeId<?> declaringType, FieldId<?,?> appCallbackFieldId, String method){
-        // Identify the 'onTetheringStarted()' method on declaringType.
-        MethodId onTetheringStarted = declaringType.getMethod(TypeId.VOID, method);
-
-        // Declare that method on the dexMaker. Use the returned Code instance
-        // as a builder that we can append instructions to.
-        Code code = dexMaker.declare(onTetheringStarted, Modifier.PUBLIC);
-        // ref this this instance
-        final Local thisRef = code.getThis(declaringType);
-
-
-        TypeId declaringTypeCallback = appCallbackFieldId.getDeclaringType();
-        Local appCallback = code.newLocal(declaringTypeCallback);
-
-        //get reference to the field
-        code.iget(appCallbackFieldId,appCallback , thisRef);
-
-        // Call method on field.
-        MethodId methodIdInAppCallback =  declaringTypeCallback.getMethod(TypeId.VOID, method, TypeId.VOID);
-        code.invokeVirtual(methodIdInAppCallback, null,appCallback , null);
-
-        // return;
-        code.returnVoid();
-
-    }
-
-
+    // TODO: is this used?
     public Class<?> getCallBackClass(){
         return myTetheringCallbackClazz;
     }

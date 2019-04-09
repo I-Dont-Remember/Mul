@@ -10,12 +10,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 
 public class DiscoverDevices extends AppCompatActivity {
     private BluetoothAdapter myBlueToothAdapter;
     public static String EXTRA_DEVICE_ADDRESS = "device_address";
+
+    private String TAG = DiscoverDevices.class.getSimpleName();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,6 +60,7 @@ public class DiscoverDevices extends AppCompatActivity {
     }
 
     private void returnResultAddress(String address){
+        Log.i(TAG, "returnResultAddresss");
         //Pass the given address back to the client page
         myBlueToothAdapter.cancelDiscovery();
         Intent intent = new Intent();
@@ -68,6 +72,7 @@ public class DiscoverDevices extends AppCompatActivity {
     private final BroadcastReceiver FoundReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "broadcastreceiver fond receiver");
             String action = intent.getAction();
 
             // When discovery finds a new device
