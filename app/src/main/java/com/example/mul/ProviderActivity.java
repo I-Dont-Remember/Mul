@@ -1,5 +1,6 @@
 package com.example.mul;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -15,6 +16,8 @@ import android.widget.Toast;
 public class ProviderActivity extends AppCompatActivity {
     //Get Access to common methods
     Client_Provider_Common common = new Client_Provider_Common();
+
+    public static String EXTRA_DEVICE_ADDRESS = "device_address";
 
     // Message types sent from the BluetoothChatService Handler
     public static final int MESSAGE_STATE_CHANGE = 1;
@@ -122,6 +125,8 @@ public class ProviderActivity extends AppCompatActivity {
     }
 
     // The Handler that gets information back from the BluetoothChatService
+
+    @SuppressLint("HandlerLeak")
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {
@@ -164,7 +169,7 @@ public class ProviderActivity extends AppCompatActivity {
                 // When DeviceListActivity returns with a device to connect
                 if (resultCode == Activity.RESULT_OK) {
                     // Get the device MAC address
-                    String address = data.getExtras().getString(DiscoverDevices.EXTRA_DEVICE_ADDRESS);
+                    String address = data.getExtras().getString(EXTRA_DEVICE_ADDRESS);
 
                     // Get the BLuetoothDevice object
                     BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
@@ -186,14 +191,14 @@ public class ProviderActivity extends AppCompatActivity {
         }
     }
 
-    public void connect(View v) {
-        Log.i(TAG, "connecting bluetooth");
-
-        if (BTService.getState() == BTCommunicationService.STATE_CONNECTED) {
-            Toast.makeText(this, "Already Connected", Toast.LENGTH_LONG);
-        } else {
-            Intent serverIntent = new Intent(this, DiscoverDevices.class);
-            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
-        }
-    }
+//    public void connect(View v) {
+//        Log.i(TAG, "connecting bluetooth");
+//
+//        if (BTService.getState() == BTCommunicationService.STATE_CONNECTED) {
+//            Toast.makeText(this, "Already Connected", Toast.LENGTH_LONG);
+//        } else {
+//            Intent serverIntent = new Intent(this, DiscoverDevices.class);
+//            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+//        }
+//    }
 }

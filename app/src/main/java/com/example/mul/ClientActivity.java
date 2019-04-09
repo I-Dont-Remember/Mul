@@ -1,10 +1,14 @@
 package com.example.mul;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -151,36 +155,112 @@ public class ClientActivity extends AppCompatActivity {
         }
     };
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CONNECT_DEVICE:
-                // When DeviceListActivity returns with a device to connect
-                if (resultCode == Activity.RESULT_OK) {
-                    // Get the device MAC address
-                    String address = data.getExtras().getString(DiscoverDevices.EXTRA_DEVICE_ADDRESS);
-                    // Get the BLuetoothDevice object
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-                    // Attempt to connect to the device
-                    BTService.connect(device);
-                }
-                break;
-            case REQUEST_ENABLE_BT:
-                // When the request to enable Bluetooth returns
-                if (resultCode == Activity.RESULT_OK) {
-                    // Bluetooth is now enabled, so set up a chat session
-                    setupChat();
-                } else {
-                    // User did not enable Bluetooth or an error occured
-                    Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-        }
-    }
+//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        switch (requestCode) {
+//            case REQUEST_CONNECT_DEVICE:
+//                // When DeviceListActivity returns with a device to connect
+//                if (resultCode == Activity.RESULT_OK) {
+//                    // Get the device MAC address
+//                    String address = data.getExtras().getString(DiscoverDevices.EXTRA_DEVICE_ADDRESS);
+//                    // Get the BLuetoothDevice object
+//                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+//                    // Attempt to connect to the device
+//                    BTService.connect(device);
+//                }
+//                break;
+//            case REQUEST_ENABLE_BT:
+//                // When the request to enable Bluetooth returns
+//                if (resultCode == Activity.RESULT_OK) {
+//                    // Bluetooth is now enabled, so set up a chat session
+//                    setupChat();
+//                } else {
+//                    // User did not enable Bluetooth or an error occured
+//                    Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
+//                    finish();
+//                }
+//        }
+//    }
 
     public void connect(View v) {
-        Intent serverIntent = new Intent(ClientActivity.this, DiscoverDevices.class);
-        startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+//        Intent serverIntent = new Intent(ClientActivity.this, DiscoverDevices.class);
+//        startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
+
+        initializeBTDiscovery();
     }
+
+    private void initializeBTDiscovery(){
+        //Turn on Bluetooth
+        if (mBluetoothAdapter == null)
+            Toast.makeText(getApplicationContext(), "Your device doesnt support Bluetooth", Toast.LENGTH_LONG).show();
+        else if (!mBluetoothAdapter.isEnabled()) {
+            Intent BtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(BtIntent, 0);
+            Toast.makeText(getApplicationContext(), "Turning on Bluetooth", Toast.LENGTH_LONG).show();
+        }
+
+        // Quick permission check
+        int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
+        permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
+        if (permissionCheck != 0) {
+            this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
+        }
+
+        //Direct all responses of "found" when searching to the "FoundReciever"
+        registerReceiver(FoundReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        this.registerReceiver(FoundReceiver, filter);
+
+        //Start Discovering local bluetooth signals
+        mBluetoothAdapter.startDiscovery();
+        Toast.makeText(getApplicationContext(), "Searching for nearby devices", Toast.LENGTH_SHORT).show();
+
+    }
+
+    private final BroadcastReceiver FoundReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            // When discovery finds a new device
+            if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                // Get the BluetoothDevice object from the Intent
+                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+                //Determine if found device is part of the Mul Community
+                if(device.getName() != null){
+                    //"MulTooth" is the current way to uniquely identify another Mul user
+                    if(device.getName().contains("MulTooth")){
+                        //If it is, return the device's address
+                        //This currently implements a "first found" algorithm. A better solution
+                        //might be to get a list of all local community members, then return the one with the
+                        //strongest signal strength.
+
+                        // Get the BLuetoothDevice object
+                        BluetoothDevice BTDevice = mBluetoothAdapter.getRemoteDevice(device.getAddress());
+                        // Attempt to connect to the device
+                        BTService.connect(BTDevice);
+                        mBluetoothAdapter.cancelDiscovery();
+                        unregisterReceiver(FoundReceiver);
+                    }
+                }
+                Log.d("Receiver", "Bluetooth Device Found: " + device.getName());
+            }
+
+            // When discovery cycle finished
+            if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                if(((BTService.getState() == BTCommunicationService.STATE_CONNECTED) || (BTService.getState() == BTCommunicationService.STATE_CONNECTING)))
+                {
+                    //The bluetooth service is attempting to make a connection or is already connected
+                    Toast.makeText(getApplicationContext(), "Finished Searching: Connection Made", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    Toast.makeText(getApplicationContext(), "Finished Searching: No Mul Users Available", Toast.LENGTH_LONG).show();
+                }
+
+
+            }
+        }
+    };
 
     public void stopConnection(View v){
 //        if (BTService != null){
