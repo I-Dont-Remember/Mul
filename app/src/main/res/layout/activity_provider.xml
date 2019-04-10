@@ -6,64 +6,52 @@
     tools:context=".ProviderActivity">
 
 
-    <EditText
-        android:id="@+id/htSpt_SSID"
-        android:layout_width="match_parent"
-        android:layout_height="61dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="140dp"
-        android:layout_weight="1"
-        android:ems="10"
-        android:hint="SSID"
-        android:inputType="textPersonName"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <EditText
-        android:id="@+id/htSpt_password"
-        android:layout_width="match_parent"
-        android:layout_height="61dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginBottom="364dp"
-        android:layout_weight="1"
-        android:ems="10"
-        android:hint="Password"
-        android:inputType="textPersonName"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="34dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="40dp"
-        android:text="1.) Turn your Hotspot On"
+        android:layout_marginStart="51dp"
+        android:layout_marginTop="151dp"
+        android:layout_marginEnd="89dp"
+        android:layout_marginBottom="47dp"
+        android:text="Click the button to share data!"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="39dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="88dp"
-        android:text="2.) Enter Your Hotspot Credentials"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="75dp"
+        android:layout_marginTop="47dp"
+        android:layout_marginEnd="112dp"
+        android:layout_marginBottom="399dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/textView">
 
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="38dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="364dp"
-        android:text="3.) You are ready to share!"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <Button
+            android:id="@+id/startButton"
+            style="@style/Widget.AppCompat.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickProvide"
+            android:text="Provide" />
+
+        <Button
+            android:id="@+id/stopButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickStop"
+            android:text="Stop Providing" />
+
+    </LinearLayout>
 
 
 </android.support.constraint.ConstraintLayout>

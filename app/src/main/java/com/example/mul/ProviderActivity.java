@@ -4,7 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,6 +17,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import java.lang.reflect.Method;
+import java.util.List;
 
 public class ProviderActivity extends AppCompatActivity {
     //Get Access to common methods
@@ -57,8 +65,6 @@ public class ProviderActivity extends AppCompatActivity {
         setContentView(R.layout.activity_provider);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        ET_SSID = (EditText) findViewById(R.id.htSpt_SSID);
-        ET_Password = (EditText) findViewById(R.id.htSpt_password);
 
 
         mBluetoothAdapter.setName("MulTooth79797");
@@ -73,9 +79,9 @@ public class ProviderActivity extends AppCompatActivity {
             return;
         }
 
-
-        ET_SSID.setText("Mul-123");
-        ET_Password.setText("mulrocks");
+//
+//        ET_SSID.setText("Mul-123");
+//        ET_Password.setText("mulrocks");
     }
 
     @Override
@@ -191,6 +197,37 @@ public class ProviderActivity extends AppCompatActivity {
         }
     }
 
+    public void onClickProvide(View view) {
+        Log.i(TAG, "clicked provide");
+
+        // TODO: pull this into helper function
+        boolean isEnabled = false;
+        // Check if hotspot on with reflection
+        // https://android.googlesource.com/platform/frameworks/base/+/refs/heads/pie-release-2/wifi/java/android/net/wifi/WifiManager.java#2133
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        Method[] methods = wifiManager.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.getName().equals("isWifiApEnabled")) {
+                try {
+                    isEnabled = (boolean) method.invoke(wifiManager);
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed checking AP status: " + e.toString());
+                    e.printStackTrace();
+                    isEnabled = false;
+                }
+            }
+        }
+        //Error isWifiApEnabled not found
+
+        if (!isEnabled) {
+            Intent intent = new Intent(getString(R.string.intent_action_turnon));
+            sendImplicitBroadcast(this,intent);
+        } else {
+            Toast.makeText(this, "! Looks like hotspot is already on !", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
 //    public void connect(View v) {
 //        Log.i(TAG, "connecting bluetooth");
 //
@@ -201,4 +238,51 @@ public class ProviderActivity extends AppCompatActivity {
 //            startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
 //        }
 //    }
+
+
+    private static void sendImplicitBroadcast(Context ctxt, Intent i) {
+        PackageManager pm=ctxt.getPackageManager();
+        List<ResolveInfo> matches=pm.queryBroadcastReceivers(i, 0);
+
+        for (ResolveInfo resolveInfo : matches) {
+            Intent explicit=new Intent(i);
+            ComponentName cn=
+                    new ComponentName(resolveInfo.activityInfo.applicationInfo.packageName,
+                            resolveInfo.activityInfo.name);
+
+            explicit.setComponent(cn);
+            ctxt.sendBroadcast(explicit);
+        }
+    }
+
+    public void onClickStop(View view) {
+        Log.i(TAG, "attempt to stop hotspot");
+
+        // TODO: pull this into helper function
+        boolean isEnabled = false;
+        // Check if hotspot on with reflection
+        // https://android.googlesource.com/platform/frameworks/base/+/refs/heads/pie-release-2/wifi/java/android/net/wifi/WifiManager.java#2133
+        WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        Method[] methods = wifiManager.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.getName().equals("isWifiApEnabled")) {
+                try {
+                    isEnabled = (boolean) method.invoke(wifiManager);
+                } catch (Exception e) {
+                    Log.e(TAG, "Failed checking AP status: " + e.toString());
+                    e.printStackTrace();
+                    isEnabled = false;
+                }
+            }
+        }
+        //Error isWifiApEnabled not found
+
+        if (isEnabled) {
+            Intent intent = new Intent(getString(R.string.intent_action_turnoff));
+            sendImplicitBroadcast(this,intent);
+        } else {
+            Toast.makeText(this, "! Looks like hotspot is not on !", Toast.LENGTH_SHORT).show();
+        }
+
+    }
 }

@@ -27,6 +27,7 @@ public class MagicActivity extends PermissionsActivity {
         Toast.makeText(c,"Hotspot turned off.", Toast.LENGTH_LONG).show();
         Intent i = new Intent(Intent.ACTION_VIEW);
         i.setData(uri);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         c.startActivity(i);
     }
 

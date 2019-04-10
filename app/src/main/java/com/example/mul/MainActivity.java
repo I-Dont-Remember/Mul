@@ -31,9 +31,6 @@ public class MainActivity extends PermissionsActivity {
     public void onClickProvider(View view) {
         Intent i = new Intent(getApplicationContext(), ProviderActivity.class);
         startActivity(i);
-
-        Intent intent = new Intent(getString(R.string.intent_action_turnon));
-        sendImplicitBroadcast(this,intent);
     }
 
     @Override
@@ -50,19 +47,4 @@ public class MainActivity extends PermissionsActivity {
 //        Intent intent = new Intent(getString(R.string.intent_action_turnoff));
 //        sendImplicitBroadcast(this,intent);
 //    }
-
-    private static void sendImplicitBroadcast(Context ctxt, Intent i) {
-        PackageManager pm=ctxt.getPackageManager();
-        List<ResolveInfo> matches=pm.queryBroadcastReceivers(i, 0);
-
-        for (ResolveInfo resolveInfo : matches) {
-            Intent explicit=new Intent(i);
-            ComponentName cn=
-                    new ComponentName(resolveInfo.activityInfo.applicationInfo.packageName,
-                            resolveInfo.activityInfo.name);
-
-            explicit.setComponent(cn);
-            ctxt.sendBroadcast(explicit);
-        }
-    }
 }
