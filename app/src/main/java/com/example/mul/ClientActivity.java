@@ -148,7 +148,8 @@ public class ClientActivity extends AppCompatActivity {
                     if(msg.getData().getString(TOAST).equals("Device connection was lost")) {
                         //Connection was broken. Currently, we just completely disconnect from the provider.
                         //Idealy we should seamlessly connect to another provider
-                        common.forgetCurrentNetwork(getApplicationContext());
+                        // TODO: get this working
+                        // common.forgetCurrentNetwork(getApplicationContext());
                     }
                     break;
             }
@@ -266,7 +267,7 @@ public class ClientActivity extends AppCompatActivity {
 //        if (BTService != null){
 //            BTService.stop();
 //        }
-
-        common.forgetCurrentNetwork(getApplicationContext());
+        // TODO: get working
+        // common.forgetCurrentNetwork(getApplicationContext());
     }
 }

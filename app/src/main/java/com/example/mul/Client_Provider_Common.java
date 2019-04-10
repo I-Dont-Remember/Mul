@@ -96,14 +96,18 @@ public class Client_Provider_Common {
 
     public void forgetCurrentNetwork(Context context){
         Log.i(TAG, "forgetCurrentNetwork");
+        wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         wifiManager.setWifiEnabled(false);
 
         List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
         for( WifiConfiguration i : list ) {
             Log.d(TAG, "Trying to forget");
-            if(i.SSID.equals(conf.SSID)){
-                wifiManager.removeNetwork(i.networkId);
+            if (i != null) {
+                if(i.SSID.equals(conf.SSID)){
+                    wifiManager.removeNetwork(i.networkId);
+                }
             }
+
         }
     }
 }
