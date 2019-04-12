@@ -235,6 +235,7 @@ public class ProviderActivity extends AppCompatActivity {
             Toast.makeText(this, "! Looks like hotspot is already on !", Toast.LENGTH_SHORT).show();
         }
 
+        // this actually starts the updater
         timerHandler.post(updater);
 
     }

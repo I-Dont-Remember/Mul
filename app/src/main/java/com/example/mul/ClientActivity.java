@@ -9,11 +9,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.TrafficStats;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ClientActivity extends AppCompatActivity {
@@ -46,6 +48,13 @@ public class ClientActivity extends AppCompatActivity {
     // Member object for the chat services
     private BTCommunicationService BTService = null;
 
+    private String TAG = ClientActivity.class.getSimpleName();
+
+    // TODO: this is same as Provider, is there anyway to abstract all this crap?
+    private long sessionStartRxBytes = 0;
+    private long sessionStartTxBytes = 0;
+    private final Handler timerHandler = new Handler();
+    private Runnable updater;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +69,30 @@ public class ClientActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        final TextView tv = findViewById(R.id.stats);
+        tv.post(new Runnable() {
+            @Override
+            public void run() {
+                tv.setText(getFriendlyUsage(0,0));
+            }
+        });
+
+        updater = new Runnable() {
+            @Override
+            public void run() {
+                TextView tv = findViewById(R.id.stats);
+                long currentTx = TrafficStats.getTotalTxBytes();
+                long currentRx = TrafficStats.getTotalRxBytes();
+                Log.i(TAG, String.format("currentTx: %d currentRx: %d", currentTx, currentRx));
+                Log.i(TAG, String.format("startTx: %d startRx: %d", sessionStartTxBytes, sessionStartRxBytes));
+                long deltaTx = currentTx - sessionStartTxBytes;
+                long deltaRx = currentRx - sessionStartRxBytes;
+                tv.setText(getFriendlyUsage(deltaTx, deltaRx));
+                // TODO: change to a longer time but can leave at 1 second while building app
+                timerHandler.postDelayed(this, 1000);
+            }
+        };
     }
 
     @Override
@@ -106,6 +139,7 @@ public class ClientActivity extends AppCompatActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        timerHandler.removeCallbacks(updater);
 //        // Stop the Bluetooth chat services
 //        if (BTService != null){
 //            BTService.stop();
@@ -187,6 +221,10 @@ public class ClientActivity extends AppCompatActivity {
 //        startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
 
         initializeBTDiscovery();
+        // TODO: here for testing functionality, remove me and uncomment section when bluetooth connection made
+        sessionStartRxBytes = TrafficStats.getTotalRxBytes();
+        sessionStartTxBytes = TrafficStats.getTotalTxBytes();
+        timerHandler.post(updater);
     }
 
     private void initializeBTDiscovery(){
@@ -253,6 +291,12 @@ public class ClientActivity extends AppCompatActivity {
                 {
                     //The bluetooth service is attempting to make a connection or is already connected
                     Toast.makeText(getApplicationContext(), "Finished Searching: Connection Made", Toast.LENGTH_LONG).show();
+
+                    // get initial values here even though we won't have connected to the wifi, and actually might still fail in that attempt
+                    // sessionStartRxBytes = TrafficStats.getTotalRxBytes();
+                    // sessionStartTxBytes = TrafficStats.getTotalTxBytes();
+                    // TODO: this actually starts the updater
+                    //  timerHandler.post(updater);
                 }
                 else{
                     Toast.makeText(getApplicationContext(), "Finished Searching: No Mul Users Available", Toast.LENGTH_LONG).show();
@@ -263,7 +307,25 @@ public class ClientActivity extends AppCompatActivity {
         }
     };
 
+    // !!!!!!!!!
+    // TODO: ahhhh don't hate me these are copied directly from Provider, they need to be abstracted to atone for this shameful behaviour
+    //
+    private String formatDataUsed(long dataUsed) {
+        if (dataUsed > (1000*1000)) {
+            return String.format("%d MB", dataUsed / (1000*1000));
+        } else if (dataUsed > 1000) {
+            return String.format("%d KB", dataUsed / 1000);
+        } else {
+            return String.format("%d B", dataUsed);
+        }
+    }
+
+    private String getFriendlyUsage(long tx, long rx) {
+        return String.format("deltaTx: %s deltaRx: %s", formatDataUsed(tx), formatDataUsed(rx));
+    }
+
     public void stopConnection(View v){
+        timerHandler.removeCallbacks(updater);
 //        if (BTService != null){
 //            BTService.stop();
 //        }
