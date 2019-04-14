@@ -36,6 +36,11 @@
             android:parentActivityName=".MainActivity"></activity>
         <activity android:name=".ProviderActivity"
             android:parentActivityName=".MainActivity"/>
+        <activity android:name=".Active_Provider"
+            android:parentActivityName=".MainActivity"></activity>
+        <activity android:name=".Active_Client"
+            android:parentActivityName=".MainActivity"></activity>
+        <activity android:name=".Session_Limits"></activity>
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

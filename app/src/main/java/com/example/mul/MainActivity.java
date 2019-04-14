@@ -16,6 +16,8 @@ import java.util.List;
 public class MainActivity extends PermissionsActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String SHOW_ICON = "show_icon" ;
+    public static boolean providing = false;
+    public static boolean connected = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,12 +26,24 @@ public class MainActivity extends PermissionsActivity {
     }
 
     public void onClickClient(View view) {
-        Intent i = new Intent(getApplicationContext(), ClientActivity.class);
+        Intent i;
+
+        if(!connected)
+            i = new Intent(getApplicationContext(), ClientActivity.class);
+        else
+            i = new Intent(getApplicationContext(), Active_Client.class);
+
         startActivity(i);
     }
 
     public void onClickProvider(View view) {
-        Intent i = new Intent(getApplicationContext(), ProviderActivity.class);
+        Intent i;
+
+        if(!providing)
+            i = new Intent(getApplicationContext(), ProviderActivity.class);
+        else
+            i = new Intent(getApplicationContext(), Active_Provider.class);
+
         startActivity(i);
     }
 

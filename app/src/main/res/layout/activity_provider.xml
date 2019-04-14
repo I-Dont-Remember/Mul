@@ -10,76 +10,39 @@
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="34dp"
-        android:layout_marginStart="51dp"
-        android:layout_marginTop="151dp"
-        android:layout_marginEnd="89dp"
-        android:layout_marginBottom="47dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="248dp"
+        android:layout_marginEnd="68dp"
+        android:layout_marginBottom="8dp"
         android:text="Click the button to share data!"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintBottom_toTopOf="@+id/startButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.968"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/startButton"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="320dp"
+        android:onClick="onClickProvide"
+        android:text="Provide"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="0dp"
-        android:layout_height="100dp"
-        android:layout_marginStart="75dp"
-        android:layout_marginTop="47dp"
-        android:layout_marginEnd="112dp"
-        android:layout_marginBottom="399dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="368dp"
+        android:onClick="onClickUpdate"
+        android:text="Set/Update Session Limits"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView">
-
-        <Button
-            android:id="@+id/startButton"
-            style="@style/Widget.AppCompat.Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onClickProvide"
-            android:text="Provide" />
-
-        <Button
-            android:id="@+id/stopButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onClickStop"
-            android:text="Stop Providing" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="281dp"
-        android:layout_height="143dp"
-        android:layout_marginStart="38dp"
-        android:layout_marginTop="41dp"
-        android:layout_marginEnd="92dp"
-        android:layout_marginBottom="199dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout">
-
-        <TextView
-            android:id="@+id/stats"
-            android:layout_width="match_parent"
-            android:layout_height="57dp"
-            android:text="TextView" />
-
-        <Button
-            android:id="@+id/statsButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="CheckStats"
-            android:onClick="onClickStats"
-            android:enabled="false"/>
-    </LinearLayout>
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>
