@@ -9,7 +9,9 @@ Echo is the local framework, it's overkill for what we need but was dead simple 
 
 Once we start using a database, for local development we can use [Localstack](https://github.com/localstack/localstack). This lets you use `docker compose` to spin up an "AWS" instance on your machine with databases and junk.  I'd recommend cloning the repo and running `docker compose up` when you want to use it, but I think there are other options if you are so inclined.
 
-Once everything is installed, to develop on the API start up Localstack, then `go run local.go`. Currently changes will not be reflected unless you restart the `local.go` server, but I have a way that I will hopefully be adding soon that auto-restarts the server when there are src file changes.
+Once everything is installed, to develop on the API start up Localstack, then `go run local.go`. Currently changes will not be reflected unless you restart the `local.go` server.
+
+If you would like it to auto-restart, there is a tool called `nodemon`([link](https://nodemon.io/)) that can be used to auto-restart functions.  I put a config file for it in `api/`, so it should work correctly by running `nodemon local.go` if you installed it globally, it is also possible to install and it on a per repo basis if we add a `package.json`.
 
 To add a new endpoint, create the handler in the `handlers` package, add a new directory for it for the lambda build process (see `hello/` for reference), and add the necessary line in the Makefile to build it.
 
