@@ -3,13 +3,18 @@ package com.example.mul;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.util.List;
 
@@ -23,6 +28,9 @@ public class MainActivity extends PermissionsActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        TextView settings = findViewById(R.id.settingView);
+        settings.setText(String.format("%s - %s", readSetting("ssid"), readSetting("password")));
     }
 
     public void onClickClient(View view) {
@@ -52,6 +60,16 @@ public class MainActivity extends PermissionsActivity {
 
     }
 
+    public void onClickSettings(View view) {
+        Intent i = new Intent(getApplicationContext(), SettingsActivity.class);
+        startActivity(i);
+    }
+
+
+    public String readSetting(String key) {
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(SettingsActivity.class.getSimpleName(), 0);
+        return settings.getString(key, "");
+    }
 //    public void onClickTurnOnAction(View v){
 //        Intent intent = new Intent(getString(R.string.intent_action_turnon));
 //        sendImplicitBroadcast(this,intent);
