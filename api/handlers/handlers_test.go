@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/I-Dont-Remember/Mul/api/db"
 	"github.com/aws/aws-lambda-go/events"
 )
 
@@ -12,7 +13,24 @@ import (
 func Test_Hello(t *testing.T) {
 	request := events.APIGatewayProxyRequest{}
 
-	resp, err := Hello(request)
+	db, _ := db.Connect()
+
+	resp, err := Hello(request, db)
+
+	if err != nil {
+		fmt.Println("error")
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println(resp)
+	}
+}
+
+func Test_RequestMulChunk(t *testing.T) {
+	request := events.APIGatewayProxyRequest{}
+
+	db, _ := db.Connect()
+
+	resp, err := RequestMulChunk(request, db)
 
 	if err != nil {
 		fmt.Println("error")
