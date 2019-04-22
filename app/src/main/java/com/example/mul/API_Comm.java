@@ -22,9 +22,9 @@ public class API_Comm {
         int data_limit;
 
         if(data_values[1].equals("MB"))
-            data_limit = Integer.parseInt(data_values[1]) * 1024;
+            data_limit = Integer.parseInt(data_values[0]) * 1024;
         else
-            data_limit = Integer.parseInt(data_values[1]) * 1024 * 1024;
+            data_limit = Integer.parseInt(data_values[0]) * 1024 * 1024;
 
         return true;
     }
