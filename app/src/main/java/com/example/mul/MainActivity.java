@@ -3,6 +3,7 @@ package com.example.mul;
 import android.Manifest;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -10,6 +11,7 @@ import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
@@ -35,8 +37,8 @@ public class MainActivity extends PermissionsActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        TextView settings = findViewById(R.id.settingView);
-        settings.setText(String.format("%s - %s", readSetting("ssid"), readSetting("password")));
+//        TextView settings = findViewById(R.id.settingView);
+//        settings.setText(String.format("%s - %s", readSetting("ssid"), readSetting("password")));
 
         // get the IMEI number of the device
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
@@ -53,6 +55,14 @@ public class MainActivity extends PermissionsActivity {
         }
     }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+        TextView settings = findViewById(R.id.settingView);
+        settings.setText(String.format("%s - %s", readSetting("ssid"), readSetting("password")));
+    }
+
     public void onClickClient(View view) {
         Intent i;
 
@@ -67,12 +77,37 @@ public class MainActivity extends PermissionsActivity {
     public void onClickProvider(View view) {
         Intent i;
 
-        if(!providing)
-            i = new Intent(getApplicationContext(), ProviderActivity.class);
-        else
-            i = new Intent(getApplicationContext(), Active_Provider.class);
+        //Make sure that the user has input valid hotspot credentials
+        //This will be most relevent upon first use(if provider never set things up in settings page)
+        //"empty" will be returned if the user is brand new. "" will be returned if the user somehow
+        //got either field to be that value
+        if(readSetting("ssid").equals("empty") || readSetting("password").equals("empty")
+            || readSetting("ssid").equals("") || readSetting("password").equals("")){
 
-        startActivity(i);
+            //Display alert dialog
+            new AlertDialog.Builder(this)
+                    .setTitle("Invalid Hotspot Credentials")
+                    .setMessage("Input valid hotspot credentials in the settings page to become a provider.")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            //Go to settings page
+                            Intent settingsIntent = new Intent(getApplicationContext(), SettingsActivity.class);
+                            startActivity(settingsIntent);
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }else{
+            //Hotspot credentials are valid
+            if(!providing)
+                i = new Intent(getApplicationContext(), ProviderActivity.class);
+            else
+                i = new Intent(getApplicationContext(), Active_Provider.class);
+
+            startActivity(i);
+        }
+
+
     }
 
     @Override
@@ -88,7 +123,7 @@ public class MainActivity extends PermissionsActivity {
 
     public String readSetting(String key) {
         SharedPreferences settings = getApplicationContext().getSharedPreferences(SettingsActivity.class.getSimpleName(), 0);
-        return settings.getString(key, "");
+        return settings.getString(key, "empty");
     }
 //    public void onClickTurnOnAction(View v){
 //        Intent intent = new Intent(getString(R.string.intent_action_turnon));

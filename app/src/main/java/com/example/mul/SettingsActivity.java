@@ -1,9 +1,11 @@
 package com.example.mul;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -31,6 +33,29 @@ public class SettingsActivity extends AppCompatActivity {
     public void onClickSubmit(View view) {
         String ssid = ssidEdit.getText().toString();
         String password = passwordEdit.getText().toString();
+
+        //ssid cannot be blank
+        if(ssid.isEmpty()){
+            ssidEdit.setError("SSID cannot be empty.");
+            ssidEdit.requestFocus();
+            return;
+        }
+
+        //password cannot be blank
+        if(password.isEmpty()){
+            passwordEdit.setError("Password cannot be empty.");
+            passwordEdit.requestFocus();
+            return;
+        }
+
+        //Remove focus from both edit texts
+        passwordEdit.clearFocus();
+        ssidEdit.clearFocus();
+
+        //Hide keyboard
+        InputMethodManager inputManager = (InputMethodManager) getSystemService(getApplicationContext().INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(view.getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
+
 
         Toast.makeText(this, String.format("%s and %s", ssid, password), Toast.LENGTH_SHORT).show();
         writeSetting("ssid", ssid);

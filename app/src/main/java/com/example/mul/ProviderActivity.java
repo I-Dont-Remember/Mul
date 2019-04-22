@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.wifi.WifiManager;
@@ -152,9 +153,14 @@ public class ProviderActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Connected to " + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
 
                     //When a connection is made, create the concatenated string containing hotspot credentials
-                    String wifiString = "Mul-123" + "." + "mulrocks" + " " + MainActivity.IMEINumber;
-//                    String wifiString = "Mul-123" + "." + "mulrocks" + " " + MainActivity.IMEINumber;
+                    //String wifiString = "Mul-123" + "." + "mulrocks" + " " + MainActivity.IMEINumber;
+                    //String wifiString = "Mul-123" + "." + "mulrocks" + " " + MainActivity.IMEINumber;
+
+
+                    String wifiString = readSetting("ssid") + "." + readSetting("password") + " " + MainActivity.IMEINumber;
+
                     //Then send that to the client so the client can connect
+                    Log.d(TAG, "WIFI STRING: " + wifiString);
                     common.sendMessage1(wifiString, BTService, mOutStringBuffer, getApplicationContext());
 
                     break;
@@ -260,5 +266,10 @@ public class ProviderActivity extends AppCompatActivity {
             explicit.setComponent(cn);
             ctxt.sendBroadcast(explicit);
         }
+    }
+
+    public String readSetting(String key) {
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(SettingsActivity.class.getSimpleName(), 0);
+        return settings.getString(key, "empty");
     }
 }

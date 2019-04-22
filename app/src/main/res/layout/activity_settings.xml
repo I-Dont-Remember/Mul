@@ -11,11 +11,11 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/ssidTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="TextView" />
+        <!--<TextView-->
+            <!--android:id="@+id/ssidTitle"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="TextView" />-->
 
         <EditText
             android:id="@+id/ssidEdit"
@@ -23,13 +23,14 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textShortMessage"
-            android:text="Mul-123" />
+            android:hint="Hotspot SSID"
+            />
 
-        <TextView
-            android:id="@+id/passwordTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Hotspot Password" />
+        <!--<TextView-->
+            <!--android:id="@+id/passwordTitle"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Hotspot Password" />-->
 
         <EditText
             android:id="@+id/passwordEdit"
@@ -37,7 +38,8 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textVisiblePassword"
-            android:text="mulrocks" />
+            android:hint="Hotspot Password"
+            />
 
         <Button
             android:id="@+id/submit"
