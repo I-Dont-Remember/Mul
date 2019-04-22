@@ -33,6 +33,7 @@ public class Client_Provider_Common {
             // Get the message bytes and tell the BluetoothChatService to write
             byte[] send = message.getBytes();
             BTService.write(send);
+
             // Reset out string buffer to zero and clear the edit text field
             mOutStringBuffer.setLength(0);
         }

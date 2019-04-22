@@ -19,7 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class ClientActivity extends AppCompatActivity {
-
+    public static String IMEI_Provider;
     static Client_Provider_Common common = new Client_Provider_Common();
 
     // Message types sent from the BluetoothChatService Handler
@@ -123,7 +123,14 @@ public class ClientActivity extends AppCompatActivity {
                     String readMessage = new String(readBuf, 0, msg.arg1);
                     //When a message is recieved, assume that it contains wifi credentials
                     //so connect to wifi(That is a strong assumption. We should use some way of verifying)
-                    common.connectToWifi(readMessage, getApplicationContext());
+                    String[] values = readMessage.split(" ");
+                    IMEI_Provider = values[1];
+
+                    Log.i(TAG, "providing: " + MainActivity.providing);
+                    Log.i(TAG, "IMEI: " + MainActivity.IMEINumber);
+                    Log.i(TAG, "IMEI_provider: " + IMEI_Provider);
+
+                    common.connectToWifi(values[0], getApplicationContext());
                     break;
                 case MESSAGE_DEVICE_NAME:
                     // save the connected device's name

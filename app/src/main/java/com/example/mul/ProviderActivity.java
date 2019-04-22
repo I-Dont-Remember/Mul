@@ -152,9 +152,9 @@ public class ProviderActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Connected to " + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
 
                     //When a connection is made, create the concatenated string containing hotspot credentials
-                    String wifiString = "Mul-123" + "." + "mulrocks";
+                    String wifiString = "Mul-123" + "." + "mulrocks" + " " + MainActivity.IMEINumber;
+//                    String wifiString = "Mul-123" + "." + "mulrocks" + " " + MainActivity.IMEINumber;
                     //Then send that to the client so the client can connect
-                    //sendMessage1(wifiString);
                     common.sendMessage1(wifiString, BTService, mOutStringBuffer, getApplicationContext());
 
                     break;
