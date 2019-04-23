@@ -5,16 +5,20 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/I-Dont-Remember/Mul/api/db"
 	"github.com/I-Dont-Remember/Mul/api/handlers"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
 // Massage the echo framework request/response to match our AWS Lambda handlers
-func adjust(fn func(events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(echo.Context) error {
+func adjust(fn func(events.APIGatewayProxyRequest, db.DB) (events.APIGatewayProxyResponse, error)) func(echo.Context) error {
 	return func(c echo.Context) error {
 
 		// TODO: validate that the string joining nonsense we're doing is actually working correctly
@@ -48,7 +52,9 @@ func adjust(fn func(events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 			QueryStringParameters: queryParams,
 			Body: string(body),
 		}
-		proxyResponse, _ := fn(request)
+
+		dbClient, _ := db.Connect(true)
+		proxyResponse, _ := fn(request, dbClient)
 
 		if proxyResponse.StatusCode > 300 {
 			fmt.Println("   [!] ", proxyResponse.Body)
@@ -65,6 +71,40 @@ func adjust(fn func(events.APIGatewayProxyRequest) (events.APIGatewayProxyRespon
 func main() {
 	port := ":4500"
 
+	// try and create table when starting local API
+	region := "us-east-2"
+	localEndpoint := "http://localhost:4569/"
+	sess, err := session.NewSession(
+		&aws.Config{
+			Region:   aws.String(region),
+			Endpoint: aws.String(localEndpoint),
+		})
+
+	conn := dynamodb.New(sess)
+
+	// try and create table since oftentimes it hasn't been locally
+	cti := &dynamodb.CreateTableInput{
+		AttributeDefinitions: []*dynamodb.AttributeDefinition{
+			{
+				AttributeName: aws.String("id"),
+				AttributeType: aws.String("S"),
+			},
+		},
+		KeySchema: []*dynamodb.KeySchemaElement{
+			{
+				AttributeName: aws.String("id"),
+				KeyType:       aws.String("HASH"),
+			},
+		},
+		ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+			ReadCapacityUnits:  aws.Int64(1),
+			WriteCapacityUnits: aws.Int64(1),
+		},
+		TableName: aws.String("Users"),
+	}
+	_, err = conn.CreateTable(cti)
+	fmt.Println(err)
+
 	e := echo.New()
 
 	// To see specific header, use ${header:foo} which will show foo's value
@@ -76,6 +116,12 @@ func main() {
 	e.Use(middleware.CORS())
 
 	e.GET("/hello", adjust(handlers.Hello))
+
+	e.POST("/user/", adjust(handlers.CreateUser))
+	e.GET("/user/:id/", adjust(handlers.GetUser))
+	e.POST("/user/:id/mulchunk", adjust(handlers.RequestMulChunk))
+	e.POST("/user/:id/limit", adjust(handlers.SetLimit))
+	e.POST("/user/:id/balance", adjust(handlers.SetBalance))
 
 	e.Logger.Fatal(e.Start(port))
 }

@@ -1,11 +1,18 @@
 package db
 
 import (
-	"os"
+	"errors"
+	"fmt"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+)
+
+var (
+	MulChunkSizeKB = 100
 )
 
 // trying to use dependency injection, it worked for my API but seems flawed in that if your interface has a lot of methods,
@@ -13,7 +20,12 @@ import (
 // and am supposed to do something where interface only has some connection stuff and just gets a struct reference that can
 // have whatever methods attached.  IDK.
 type DB interface {
-	addMulChunk() error
+	AddMulChunk(string, string) (int, error)
+	updateNumField(string, string, string, int) (int, error)
+	CreateUser(User) error
+	GetUser(string) (User, error)
+	SetLimit(string, int) error
+	SetBalance(string, int) error
 }
 
 // Dynamo implements DB
@@ -22,24 +34,31 @@ type Dynamo struct {
 	Table string
 }
 
+// User is json helper for getting info from DB
+type User struct {
+	ID           string `json:"id"`
+	Limit        int    `json:"limit"`
+	CentsBalance int    `json:"cents_balance"`
+	DataUsed     int    `json:"data_used"`
+	DataProvided int    `json:"data_provided"`
+}
+
 // Connect returns a DynamoDB connection; local or remote
-func Connect() (DB, error) {
+func Connect(isLocal bool) (DB, error) {
 	region := "us-east-2"
 	localEndpoint := "http://localhost:4569/"
-	env := os.Getenv("API_ENV")
+	// env := os.Getenv("API_ENV")
 
-	if env != "local" && env != "prod" && env != "dev" {
-		// TODO: probably trying to run a test, we should probably pull in and clean up code for passing Mockdb to tests
-		return Dynamo{}, nil
-	}
+	// if env != "local" && env != "prod" && env != "dev" {
+	// 	// TODO: probably trying to run a test, we should probably pull in and clean up code for passing Mockdb to tests
+	// 	return Dynamo{}, nil
+	// }
 
 	d := &Dynamo{}
-	if env == "prod" || env == "local" {
-		d.Table = "TableName"
-	}
+	d.Table = "Users"
 
 	sess, err := session.NewSession(&aws.Config{Region: aws.String(region)})
-	if env == "local" {
+	if isLocal {
 		sess, err = session.NewSession(
 			&aws.Config{
 				Region:   aws.String(region),
@@ -55,6 +74,128 @@ func Connect() (DB, error) {
 	return d, nil
 }
 
-func (db Dynamo) addMulChunk() error {
-	return nil
+// addMulChunk returns the updated data used value for client side
+func (db Dynamo) AddMulChunk(clientID string, providerID string) (int, error) {
+	// attempt to update client and provider with new data chunk used
+	_, err := db.updateNumField("#PROVIDED", "data_provided", providerID, MulChunkSizeKB)
+	if err != nil {
+		return -1, err
+	}
+	dataUsed, err := db.updateNumField("#USED", "data_used", clientID, MulChunkSizeKB)
+	if err != nil {
+		return -1, err
+	}
+	return dataUsed, nil
+}
+
+func (db Dynamo) updateNumField(attributeName string, jsonName string, id string, amount int) (int, error) {
+	ui := &dynamodb.UpdateItemInput{
+		ExpressionAttributeNames: map[string]*string{
+			attributeName: aws.String(jsonName),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":val": {
+				N: aws.String(strconv.Itoa(amount)),
+			},
+		},
+		Key: map[string]*dynamodb.AttributeValue{
+			"id": {
+				S: aws.String(id),
+			},
+		},
+		TableName:        aws.String(db.Table),
+		UpdateExpression: aws.String(fmt.Sprintf("SET %s = %s + :val", attributeName, attributeName)),
+		ReturnValues:     aws.String("UPDATED_NEW"),
+	}
+
+	result, err := db.conn.UpdateItem(ui)
+	if err != nil {
+		return 0, err
+	}
+
+	if attr, ok := result.Attributes[jsonName]; ok {
+		// now convert the aws string value to integer
+		return strconv.Atoi(*attr.N)
+	}
+
+	return -1, errors.New("Couldn't get attribute")
+}
+
+func (db Dynamo) CreateUser(u User) error {
+	av, err := dynamodbattribute.MarshalMap(u)
+	if err != nil {
+		return err
+	}
+
+	pi := &dynamodb.PutItemInput{
+		Item:      av,
+		TableName: aws.String(db.Table),
+	}
+
+	_, err = db.conn.PutItem(pi)
+	return err
+}
+
+// for non-existent users, this returns a User object with nil-type for each element (0,"", etc.)
+func (db Dynamo) GetUser(id string) (User, error) {
+	u := User{}
+
+	gi := &dynamodb.GetItemInput{
+		Key: map[string]*dynamodb.AttributeValue{
+			"id": {
+				S: aws.String(id),
+			},
+		},
+		TableName: aws.String(db.Table),
+	}
+	result, err := db.conn.GetItem(gi)
+	if err != nil {
+		return u, err
+	}
+
+	err = dynamodbattribute.UnmarshalMap(result.Item, &u)
+	return u, err
+}
+
+func (db Dynamo) SetLimit(id string, limit int) error {
+	ui := &dynamodb.UpdateItemInput{
+		ExpressionAttributeNames: map[string]*string{
+			"#LIMIT": aws.String("limit"),
+		},
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":l": {
+				N: aws.String(strconv.Itoa(limit)),
+			},
+		},
+		Key: map[string]*dynamodb.AttributeValue{
+			"id": {
+				S: aws.String(id),
+			},
+		},
+		TableName:        aws.String(db.Table),
+		UpdateExpression: aws.String("set #LIMIT = :l"),
+	}
+
+	_, err := db.conn.UpdateItem(ui)
+	return err
+}
+
+func (db Dynamo) SetBalance(id string, balance int) error {
+	ui := &dynamodb.UpdateItemInput{
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":v": {
+				N: aws.String("123"), //strconv.Itoa(balance)),
+			},
+		},
+		Key: map[string]*dynamodb.AttributeValue{
+			"id": {
+				S: aws.String(id),
+			},
+		},
+		TableName:        aws.String(db.Table),
+		UpdateExpression: aws.String("set cents_balance = :v"),
+	}
+
+	_, err := db.conn.UpdateItem(ui)
+	return err
 }

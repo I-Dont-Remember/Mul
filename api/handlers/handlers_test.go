@@ -13,7 +13,7 @@ import (
 func Test_Hello(t *testing.T) {
 	request := events.APIGatewayProxyRequest{}
 
-	db, _ := db.Connect()
+	db, _ := db.Connect(true)
 
 	resp, err := Hello(request, db)
 
@@ -28,7 +28,7 @@ func Test_Hello(t *testing.T) {
 func Test_RequestMulChunk(t *testing.T) {
 	request := events.APIGatewayProxyRequest{}
 
-	db, _ := db.Connect()
+	db, _ := db.Connect(true)
 
 	resp, err := RequestMulChunk(request, db)
 
