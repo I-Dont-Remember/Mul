@@ -76,8 +76,13 @@ func Connect(isLocal bool) (DB, error) {
 
 // addMulChunk returns the updated data used value for client side
 func (db Dynamo) AddMulChunk(clientID string, providerID string) (int, error) {
+	err := db.checkUser(clientID, "addMulChunk")
+	if err != nil {
+		return -1, err
+	}
+
 	// attempt to update client and provider with new data chunk used
-	_, err := db.updateNumField("#PROVIDED", "data_provided", providerID, MulChunkSizeKB)
+	_, err = db.updateNumField("#PROVIDED", "data_provided", providerID, MulChunkSizeKB)
 	if err != nil {
 		return -1, err
 	}
@@ -158,6 +163,11 @@ func (db Dynamo) GetUser(id string) (User, error) {
 }
 
 func (db Dynamo) SetLimit(id string, limit int) error {
+	err := db.checkUser(id, "setLimit")
+	if err != nil {
+		return err
+	}
+
 	ui := &dynamodb.UpdateItemInput{
 		ExpressionAttributeNames: map[string]*string{
 			"#LIMIT": aws.String("limit"),
@@ -176,11 +186,16 @@ func (db Dynamo) SetLimit(id string, limit int) error {
 		UpdateExpression: aws.String("set #LIMIT = :l"),
 	}
 
-	_, err := db.conn.UpdateItem(ui)
+	_, err = db.conn.UpdateItem(ui)
 	return err
 }
 
 func (db Dynamo) SetBalance(id string, balance int) error {
+	err := db.checkUser(id, "setBalance")
+	if err != nil {
+		return err
+	}
+
 	ui := &dynamodb.UpdateItemInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":v": {
@@ -196,6 +211,23 @@ func (db Dynamo) SetBalance(id string, balance int) error {
 		UpdateExpression: aws.String("set cents_balance = :v"),
 	}
 
-	_, err := db.conn.UpdateItem(ui)
+	_, err = db.conn.UpdateItem(ui)
 	return err
+}
+
+// private method but still wanted access to to db struct
+func (db Dynamo) checkUser(id string, method string) error {
+	u, err := db.GetUser(id)
+	if err != nil {
+		fmt.Println(err)
+		return errors.New("failed checking user for " + method)
+	}
+	if u.ID == "" {
+		u.ID = id
+		err = db.CreateUser(u)
+		if err != nil {
+			return errors.New("failed creating user for " + method)
+		}	
+	}
+	return nil
 }

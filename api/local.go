@@ -100,7 +100,7 @@ func main() {
 			ReadCapacityUnits:  aws.Int64(1),
 			WriteCapacityUnits: aws.Int64(1),
 		},
-		TableName: aws.String("Users"),
+		TableName: aws.String("MulUsers"),
 	}
 	_, err = conn.CreateTable(cti)
 	fmt.Println(err)
