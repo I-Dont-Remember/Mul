@@ -45,7 +45,7 @@ func CreateUser(req events.APIGatewayProxyRequest, d db.DB) (events.APIGatewayPr
 		return serverError(), nil
 	}
 
-	imei := data["imei"].(string)
+	imei := data["id"].(string)
 
 	user := db.User{
 		ID: imei,

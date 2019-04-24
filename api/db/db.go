@@ -45,7 +45,7 @@ type User struct {
 
 // Connect returns a DynamoDB connection; local or remote
 func Connect(isLocal bool) (DB, error) {
-	region := "us-east-2"
+	region := "us-east-1"
 	localEndpoint := "http://localhost:4569/"
 	// env := os.Getenv("API_ENV")
 
@@ -55,7 +55,7 @@ func Connect(isLocal bool) (DB, error) {
 	// }
 
 	d := &Dynamo{}
-	d.Table = "Users"
+	d.Table = "MulUsers"
 
 	sess, err := session.NewSession(&aws.Config{Region: aws.String(region)})
 	if isLocal {
@@ -184,7 +184,7 @@ func (db Dynamo) SetBalance(id string, balance int) error {
 	ui := &dynamodb.UpdateItemInput{
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":v": {
-				N: aws.String("123"), //strconv.Itoa(balance)),
+				N: aws.String(strconv.Itoa(balance)),
 			},
 		},
 		Key: map[string]*dynamodb.AttributeValue{

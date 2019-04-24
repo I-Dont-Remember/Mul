@@ -14,7 +14,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 			StatusCode: 507,
 		}, nil
 	} else {
-		return handlers.Hello(request, d)
+		return handlers.SetBalance(request, d)
 	}
 }
 

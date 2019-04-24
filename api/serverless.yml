@@ -21,10 +21,23 @@ frameworkVersion: ">=1.28.0 <2.0.0"
 provider:
   name: aws
   runtime: go1.x
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:BatchGetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: 
+        # Can either do by specific arn or wildcard ** Should probably not do this so insecurely **
+        - "arn:aws:dynamodb:${self:provider.region}:*:table/*"
 
 # you can overwrite defaults here
 #  stage: dev
-#  region: us-east-1
 
 # you can add statements to the Lambda function's IAM Role here
 #  iamRoleStatements:
@@ -59,6 +72,42 @@ functions:
       - http:
           path: hello
           method: get
+
+  createUser:
+    handler: bin/createUser
+    events:
+      - http:
+          path: user
+          method: post
+
+  getUser:
+    handler: bin/getUser
+    events:
+      - http:
+          path: user/{id}
+          method: get
+
+
+  requestMulChunk:
+    handler: bin/requestMulChunk
+    events:
+      - http:
+          path: user/{id}/mulchunk
+          method: post
+
+  setLimit:
+    handler: bin/setLimit
+    events:
+      - http:
+          path: user/{id}/limit
+          method: post
+
+  setBalance:
+    handler: bin/setBalance
+    events:
+      - http:
+          path: user/{id}/balance
+          method: post
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
