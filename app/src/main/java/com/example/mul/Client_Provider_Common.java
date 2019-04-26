@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.util.Log;
 import android.widget.Toast;
@@ -98,13 +99,16 @@ public class Client_Provider_Common {
     public void forgetCurrentNetwork(Context context){
         Log.i(TAG, "forgetCurrentNetwork");
         wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+
+        WifiInfo info = wifiManager.getConnectionInfo();
+        String ssid = ((WifiInfo) info).getSSID();
         wifiManager.setWifiEnabled(false);
 
         List<WifiConfiguration> list = wifiManager.getConfiguredNetworks();
         for( WifiConfiguration i : list ) {
             Log.d(TAG, "Trying to forget");
             if (i != null) {
-                if(i.SSID.equals(conf.SSID)){
+                if(i.SSID.equals(ssid)){
                     wifiManager.removeNetwork(i.networkId);
                 }
             }

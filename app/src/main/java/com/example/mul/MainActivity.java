@@ -60,7 +60,7 @@ public class MainActivity extends PermissionsActivity {
         super.onResume();
 
         TextView settings = findViewById(R.id.settingView);
-        settings.setText(String.format("%s - %s", readSetting("ssid"), readSetting("password")));
+        settings.setText(String.format("SSID: %s - Passphrase: %s", readSetting("ssid"), readSetting("password")));
     }
 
     public void onClickClient(View view) {

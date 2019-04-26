@@ -56,17 +56,17 @@ public class Active_Client extends AppCompatActivity {
 
 
     public void onClickDisconnect(View view) {
+        Log.d(TAG, "in handle disconnect");
         timerHandler.removeCallbacks(updater);
 
+        // TODO: get working
+        // this can't work because there's no BTService in this activity, we would have to use some sort of singleton pattern to share variables between activities
 //        if (BTService != null){
 //            BTService.stop();
 //        }
-        // TODO: get working
         ClientActivity.common.forgetCurrentNetwork(getApplicationContext());
 
-        Intent i = new Intent(getApplicationContext(), ClientActivity.class);
-        MainActivity.connected = false;
-        startActivity(i);
+        finish();
     }
 
     public void onClickTopUp(View view) {
@@ -93,6 +93,7 @@ public class Active_Client extends AppCompatActivity {
         super.onDestroy();
 
         timerHandler.removeCallbacks(updater);
+        Log.d(TAG, "destroying active client");
     }
 
 }

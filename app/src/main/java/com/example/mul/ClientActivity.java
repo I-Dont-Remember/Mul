@@ -99,12 +99,26 @@ public class ClientActivity extends AppCompatActivity {
     @Override
     public synchronized void onPause() {
         super.onPause();
+
     }
 
+    public void onDestroy() {
+        super.onDestroy();
+        try {
+            unregisterReceiver(FoundReceiver);
+        } catch (Exception e) {
+            // whatever fuck this leaked intent receiver bullshit
+        }
+    }
     @Override
     public void onStop() {
         super.onStop();
-    }
+        try {
+            unregisterReceiver(FoundReceiver);
+        } catch (Exception e) {
+            // whatever fuck this leaked intent receiver bullshit
+        }    }
+
 
     // The Handler that gets information back from the BluetoothChatService
     @SuppressLint("HandlerLeak")
