@@ -18,6 +18,15 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
+
 public class ClientActivity extends AppCompatActivity {
     public static String IMEI_Provider;
     static Client_Provider_Common common = new Client_Provider_Common();
@@ -54,6 +63,48 @@ public class ClientActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client);
+
+        TextView balanceView = findViewById(R.id.balance);
+        TextView dataUsedView = findViewById(R.id.dataUsed);
+
+        // check api for user info
+        MulAPI.get_user(getApplicationContext(), new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d(TAG, "interneting failed somehow");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                // deserialize the crap from response
+                String jsonStr = response.body().string();
+                try {
+                    JSONObject obj = new JSONObject(jsonStr);
+                    String id = obj.getString("id");
+                    int centsBalance = 0;
+                    int dataUsed = 0;
+                    if (!id.equals("")) {
+                        // user actually exists
+                        centsBalance = obj.getInt("cents_balance");
+                        dataUsed = obj.getInt("data_used");
+                    }
+
+                    final int finalBalance = centsBalance;
+                    final int finalUsed = dataUsed;
+                    ClientActivity.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            balanceView.setText(String.format("%d", finalBalance));
+                            dataUsedView.setText(String.format("%d", finalUsed));
+                        }
+                    });
+
+                } catch (JSONException e) {
+                    Log.d(TAG, "failed parsing JSON from API");
+                    return;
+                }
+            }
+        });
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
