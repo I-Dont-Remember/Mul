@@ -21,6 +21,9 @@ public class Active_Provider extends AppCompatActivity {
     private long sessionStartTxBytes = 0;
     public final Handler timerHandler = new Handler();
 
+    private long deltaTX_prev, deltaRX_prev;
+    private boolean start_detecting = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +46,13 @@ public class Active_Provider extends AppCompatActivity {
                 Log.i(TAG, String.format("startTx: %d startRx: %d", sessionStartTxBytes, sessionStartRxBytes));
                 long deltaTx = currentTx - sessionStartTxBytes;
                 long deltaRx = currentRx - sessionStartRxBytes;
-                tv.setText(getFriendlyUsage(deltaTx, deltaRx));
+
+                if((deltaTX_prev - deltaTx) < 50)
+                    start_detecting = true;
+
+                if(start_detecting)
+                    tv.setText(getFriendlyUsage(deltaTx, deltaRx));
+                
                 // TODO: change to a longer time but can leave at 1 second while building app
                 timerHandler.postDelayed(this, 1000);
             }
@@ -99,10 +108,10 @@ public class Active_Provider extends AppCompatActivity {
     }
 
     private String formatDataUsed(long dataUsed) {
-        if (dataUsed > (1000*1000)) {
-            return String.format("%d MB", dataUsed / (1000*1000));
-        } else if (dataUsed > 1000) {
-            return String.format("%d KB", dataUsed / 1000);
+        if (dataUsed > (1024*1024)) {
+            return String.format("%d.%d MB", dataUsed / (1024*1024), dataUsed % 1024*1024);
+        } else if (dataUsed > 1024) {
+            return String.format("%d KB", dataUsed / 1024);
         } else {
             return String.format("%d B", dataUsed);
         }

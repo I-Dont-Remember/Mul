@@ -46,7 +46,7 @@ public class Active_Client extends AppCompatActivity {
                 long deltaTx = currentTx - sessionStartTxBytes;
                 long deltaRx = currentRx - sessionStartRxBytes;
 
-                if((deltaTX_prev - deltaTx) < 20)
+                if((deltaTX_prev - deltaTx) < 50)
                     start_detecting = true;
 
                 if(start_detecting)
@@ -88,10 +88,10 @@ public class Active_Client extends AppCompatActivity {
 
     // TODO: ahhhh don't hate me these are copied directly from Provider, they need to be abstracted to atone for this shameful behaviour
     private String formatDataUsed(long dataUsed) {
-        if (dataUsed > (1000*1000)) {
-            return String.format("%d MB", dataUsed / (1000*1000));
-        } else if (dataUsed > 1000) {
-            return String.format("%d KB", dataUsed / 1000);
+        if (dataUsed > (1024*1024)) {
+            return String.format("%d.%d MB", dataUsed / (1024*1024), dataUsed % 1024*1024);
+        } else if (dataUsed > 1024) {
+            return String.format("%d KB", dataUsed / 1024);
         } else {
             return String.format("%d B", dataUsed);
         }
