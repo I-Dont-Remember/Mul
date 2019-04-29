@@ -63,7 +63,8 @@ public class Active_Client extends AppCompatActivity {
         // TODO: here for testing functionality, remove me and uncomment section when bluetooth connection made
         sessionStartRxBytes = TrafficStats.getTotalRxBytes();
         sessionStartTxBytes = TrafficStats.getTotalTxBytes();
-        timerHandler.post(updater);
+        // hold off on starting the timer to get over the data spike
+        timerHandler.postDelayed(updater, 5000);
     }
 
 
