@@ -70,7 +70,8 @@ public class Active_Client extends AppCompatActivity {
     }
 
     public void onClickTopUp(View view) {
-
+        Intent i = new Intent(getApplicationContext(), topUp.class);
+        startActivity(i);
     }
 
     // TODO: ahhhh don't hate me these are copied directly from Provider, they need to be abstracted to atone for this shameful behaviour

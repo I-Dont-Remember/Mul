@@ -34,6 +34,13 @@
         android:textAlignment="center" />
 
     <Button
+        android:id="@+id/topupButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onClickTopUp"
+        android:text="TOP UP YOUR ACCOUNT" />
+
+    <Button
         android:id="@+id/startConnection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

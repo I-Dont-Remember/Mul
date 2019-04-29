@@ -102,8 +102,8 @@ functions:
           path: user/{id}/limit
           method: post
 
-  setBalance:
-    handler: bin/setBalance
+  AddToBalance:
+    handler: bin/AddToBalance
     events:
       - http:
           path: user/{id}/balance

@@ -94,7 +94,7 @@ public class ClientActivity extends AppCompatActivity {
                     ClientActivity.this.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            balanceView.setText(String.format("%d", finalBalance));
+                            balanceView.setText(String.format("$%d.%d", finalBalance/100, finalBalance%100));
                             dataUsedView.setText(String.format("%d", finalUsed));
                         }
                     });
@@ -335,4 +335,9 @@ public class ClientActivity extends AppCompatActivity {
             }
         }
     };
+
+    public void onClickTopUp(View view) {
+        Intent i = new Intent(getApplicationContext(), topUp.class);
+        startActivity(i);
+    }
 }

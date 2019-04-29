@@ -12,10 +12,15 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 import static com.google.android.gms.common.internal.safeparcel.SafeParcelable.NULL;
 
@@ -72,8 +77,6 @@ public class Session_Limits extends AppCompatActivity {
 
     public void onClickSave(View v){
         saveUserData();
-        Toast.makeText(getApplicationContext(), "Updated monthly limit!", Toast.LENGTH_SHORT).show();
-        finish();
     }
 
     // ****************** private helper functions ***************************//
@@ -119,13 +122,6 @@ public class Session_Limits extends AppCompatActivity {
     private void saveUserData() {
         Log.d(TAG, "saveUserData()");
 
-        // Getting the shared preferences editor
-        String mKey = getString(R.string.preference);
-        SharedPreferences mPrefs = getSharedPreferences(mKey, MODE_PRIVATE);
-
-        SharedPreferences.Editor mEditor = mPrefs.edit();
-        mEditor.clear();
-
         // get data value
         EditText data_limit_text = (EditText) findViewById(R.id.limit);
         data_limit = data_limit_text.getText().toString();
@@ -138,11 +134,41 @@ public class Session_Limits extends AppCompatActivity {
 
         String saved_info = data_limit + " " + MB_or_GB;
 
-        // Save list information
-        mKey = getString(R.string.preference_key);
-        mEditor.putString(mKey, saved_info);
+        MulAPI.post_limit(getApplicationContext(), saved_info, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d(TAG, "failed internetting somehow");
+            }
 
-        // Commit all the changes into the shared preference
-        mEditor.commit();
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String msg;
+                if (response.isSuccessful()) {
+                    msg = "Updated monthly limit!";
+
+                    // Only save shared preference update if we were successful updating database
+                    String mKey = getString(R.string.preference);
+                    SharedPreferences mPrefs = getSharedPreferences(mKey, MODE_PRIVATE);
+
+                    SharedPreferences.Editor mEditor = mPrefs.edit();
+                    mEditor.clear();
+                    // Save list information
+                    mKey = getString(R.string.preference_key);
+                    mEditor.putString(mKey, saved_info);
+
+                    // Commit all the changes into the shared preference
+                    mEditor.commit();
+                } else {
+                    msg = "Couldn't update limit";
+                }
+                Session_Limits.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            }
+        });
     }
 }

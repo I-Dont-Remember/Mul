@@ -25,7 +25,7 @@ type DB interface {
 	CreateUser(User) error
 	GetUser(string) (User, error)
 	SetLimit(string, int) error
-	SetBalance(string, int) error
+	AddToBalance(string, int) error
 }
 
 // Dynamo implements DB
@@ -190,28 +190,31 @@ func (db Dynamo) SetLimit(id string, limit int) error {
 	return err
 }
 
-func (db Dynamo) SetBalance(id string, balance int) error {
-	err := db.checkUser(id, "setBalance")
+func (db Dynamo) AddToBalance(id string, addition int) error {
+	err := db.checkUser(id, "AddToBalance")
 	if err != nil {
 		return err
 	}
 
-	ui := &dynamodb.UpdateItemInput{
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":v": {
-				N: aws.String(strconv.Itoa(balance)),
-			},
-		},
-		Key: map[string]*dynamodb.AttributeValue{
-			"id": {
-				S: aws.String(id),
-			},
-		},
-		TableName:        aws.String(db.Table),
-		UpdateExpression: aws.String("set cents_balance = :v"),
-	}
+	// set balance, but we really should add it to existing balance
+	// ui := &dynamodb.UpdateItemInput{
+	// 	ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+	// 		":v": {
+	// 			N: aws.String(strconv.Itoa(balance)),
+	// 		},
+	// 	},
+	// 	Key: map[string]*dynamodb.AttributeValue{
+	// 		"id": {
+	// 			S: aws.String(id),
+	// 		},
+	// 	},
+	// 	TableName:        aws.String(db.Table),
+	// 	UpdateExpression: aws.String("set cents_balance = :v"),
+	// }
 
-	_, err = db.conn.UpdateItem(ui)
+	// _, err = db.conn.UpdateItem(ui)
+	
+	_, err = db.updateNumField("#BALANCE", "cents_balance", id, addition)
 	return err
 }
 

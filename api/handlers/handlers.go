@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/I-Dont-Remember/Mul/api/db"
 	"github.com/aws/aws-lambda-go/events"
@@ -45,10 +44,10 @@ func CreateUser(req events.APIGatewayProxyRequest, d db.DB) (events.APIGatewayPr
 		return serverError(), nil
 	}
 
-	imei := data["id"].(string)
+	id := data["id"].(string)
 
 	user := db.User{
-		ID: imei,
+		ID: id,
 	}
 	err = d.CreateUser(user)
 	if err != nil {
@@ -132,7 +131,7 @@ func SetLimit(req events.APIGatewayProxyRequest, d db.DB) (events.APIGatewayProx
 		return serverError(), nil
 	}
 
-	limit, err := strconv.Atoi(data["limit"].(string))
+	limit := int(data["limit"].(float64))
 	if err != nil {
 		log.Println(err)
 		return serverError(), nil
@@ -147,8 +146,8 @@ func SetLimit(req events.APIGatewayProxyRequest, d db.DB) (events.APIGatewayProx
 	return happy(map[string]interface{}{}), nil
 }
 
-// POST /user/<id>/balance
-func SetBalance(req events.APIGatewayProxyRequest, d db.DB) (events.APIGatewayProxyResponse, error) {
+// POST /user/<id>/balance this can be used for payments by passing negative integers
+func AddToBalance(req events.APIGatewayProxyRequest, d db.DB) (events.APIGatewayProxyResponse, error) {
 	uid := req.PathParameters["id"]
 
 	var data map[string]interface{}
@@ -159,14 +158,14 @@ func SetBalance(req events.APIGatewayProxyRequest, d db.DB) (events.APIGatewayPr
 	}
 
 	fmt.Println(data)
-	balance, err := strconv.Atoi(data["balance"].(string))
+	balance := int(data["balance"].(float64))
 	if err != nil {
 		log.Println(err)
 		return serverError(), nil
 	}
 
-	log.Printf("%s - setting balance %d\n", uid, balance)
-	err = d.SetBalance(uid, balance)
+	log.Printf("%s - adding to balance %d\n", uid, balance)
+	err = d.AddToBalance(uid, balance)
 	if err != nil {
 		log.Println(err)
 		return serverError(), nil

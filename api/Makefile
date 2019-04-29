@@ -7,7 +7,7 @@ build:
 	env GOOS=linux go build -ldflags="-s -w" -o bin/createUser createUser/main.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/requestMulChunk requestMulChunk/main.go
 	env GOOS=linux go build -ldflags="-s -w" -o bin/setLimit setLimit/main.go
-	env GOOS=linux go build -ldflags="-s -w" -o bin/setBalance setBalance/main.go
+	env GOOS=linux go build -ldflags="-s -w" -o bin/AddToBalance AddToBalance/main.go
 
 clean:
 	rm -rf ./bin ./vendor Gopkg.lock

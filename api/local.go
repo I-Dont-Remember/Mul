@@ -121,7 +121,7 @@ func main() {
 	e.GET("/user/:id/", adjust(handlers.GetUser))
 	e.POST("/user/:id/mulchunk", adjust(handlers.RequestMulChunk))
 	e.POST("/user/:id/limit", adjust(handlers.SetLimit))
-	e.POST("/user/:id/balance", adjust(handlers.SetBalance))
+	e.POST("/user/:id/balance", adjust(handlers.AddToBalance))
 
 	e.Logger.Fatal(e.Start(port))
 }
