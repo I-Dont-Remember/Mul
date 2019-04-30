@@ -18,7 +18,7 @@ public class Active_Client extends AppCompatActivity {
 
     private String TAG = ClientActivity.class.getSimpleName();
 
-    private long deltaTX_prev, deltaRX_prev;
+    private long deltaRX_prev;
     private boolean start_detecting = false;
 
     @Override
@@ -46,14 +46,13 @@ public class Active_Client extends AppCompatActivity {
                 long deltaTx = currentTx - sessionStartTxBytes;
                 long deltaRx = currentRx - sessionStartRxBytes;
 
-                if((deltaTX_prev - deltaTx) < 50)
-                    start_detecting = true;
+//                if((deltaRX_prev - deltaRx) < 50)
+//                    start_detecting = true;
 
-                if(start_detecting)
+//                if(start_detecting)
                     tv.setText(getFriendlyUsage(deltaTx, deltaRx));
 
                 // TODO: change to a longer time but can leave at 1 second while building app
-                deltaTX_prev = deltaTx;
                 deltaRX_prev = deltaRx;
 
                 timerHandler.postDelayed(this, 1000);

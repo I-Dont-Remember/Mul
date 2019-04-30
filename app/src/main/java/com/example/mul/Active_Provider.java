@@ -12,7 +12,15 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.lang.reflect.Method;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class Active_Provider extends AppCompatActivity {
     private String TAG = ProviderActivity.class.getSimpleName();
@@ -30,36 +38,88 @@ public class Active_Provider extends AppCompatActivity {
         setContentView(R.layout.active_provider);
         MainActivity.providing = true;
 
-        // makes the assumption that once hotspot is on, Wifi is off and all traffic is through mobile network.
-        // The provider can still use phone though, so that will throw off traffic readings versus actual client usage.
-        sessionStartRxBytes = TrafficStats.getMobileRxBytes();
-        sessionStartTxBytes = TrafficStats.getMobileTxBytes();
-        Log.i(TAG, String.format("startRx: %d startTx: %d", sessionStartRxBytes, sessionStartTxBytes));
+        TextView limitView = findViewById(R.id.limit);
+        TextView providedView = findViewById(R.id.dataProvided);
+        TextView tv = findViewById(R.id.stats);
 
-        updater = new Runnable() {
+        // check api for user info
+        MulAPI.get_user(getApplicationContext(), new Callback() {
             @Override
-            public void run() {
-                TextView tv = findViewById(R.id.stats);
-                long currentTx = TrafficStats.getMobileTxBytes();
-                long currentRx = TrafficStats.getMobileRxBytes();
-                Log.i(TAG, String.format("currentTx: %d currentRx: %d", currentTx, currentRx));
-                Log.i(TAG, String.format("startTx: %d startRx: %d", sessionStartTxBytes, sessionStartRxBytes));
-                long deltaTx = currentTx - sessionStartTxBytes;
-                long deltaRx = currentRx - sessionStartRxBytes;
-
-                if((deltaTX_prev - deltaTx) < 50)
-                    start_detecting = true;
-
-                if(start_detecting)
-                    tv.setText(getFriendlyUsage(deltaTx, deltaRx));
-                
-                // TODO: change to a longer time but can leave at 1 second while building app
-                timerHandler.postDelayed(this, 1000);
+            public void onFailure(Call call, IOException e) {
+                Log.d(TAG, "interneting failed somehow");
             }
-        };
 
-        // this actually starts the updater
-        timerHandler.post(updater);
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String jsonStr = response.body().string();
+                try {
+                    JSONObject obj = new JSONObject(jsonStr);
+                    String id = obj.getString("id");
+                    int centsBalance = 0;
+                    int dataUsed = 0;
+                    int dataProvided = 0;
+                    int limit = 0;
+                    if (!id.equals("")) {
+                        // user actually exists
+                        centsBalance = obj.getInt("cents_balance");
+                        dataUsed = obj.getInt("data_used");
+                        dataProvided = obj.getInt("data_provided");
+                        limit = obj.getInt("limit");
+                    }
+
+                    final int finalLimit = limit;
+                    final int finalProvided = dataProvided;
+
+                    Active_Provider.this.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            tv.setText(String.format("%d", finalProvided));
+                            providedView.setText(String.format("%d", finalProvided));
+                            limitView.setText(String.format("%d", finalLimit));
+                        }
+                    });
+
+
+//                    balanceView.setText(String.format("%d", centsBalance));
+//                    dataUsedView.setText(String.format("%d", dataUsed));
+
+                } catch (JSONException e) {
+                    Log.d(TAG, "failed parsing JSON from API");
+                    return;
+                }
+            };
+        });
+
+//        // makes the assumption that once hotspot is on, Wifi is off and all traffic is through mobile network.
+//        // The provider can still use phone though, so that will throw off traffic readings versus actual client usage.
+//        sessionStartRxBytes = TrafficStats.getMobileRxBytes();
+//        sessionStartTxBytes = TrafficStats.getMobileTxBytes();
+//        Log.i(TAG, String.format("startRx: %d startTx: %d", sessionStartRxBytes, sessionStartTxBytes));
+//
+//        updater = new Runnable() {
+//            @Override
+//            public void run() {
+//                TextView tv = findViewById(R.id.stats);
+//                long currentTx = TrafficStats.getMobileTxBytes();
+//                long currentRx = TrafficStats.getMobileRxBytes();
+//                Log.i(TAG, String.format("currentTx: %d currentRx: %d", currentTx, currentRx));
+//                Log.i(TAG, String.format("startTx: %d startRx: %d", sessionStartTxBytes, sessionStartRxBytes));
+//                long deltaTx = currentTx - sessionStartTxBytes;
+//                long deltaRx = currentRx - sessionStartRxBytes;
+//
+////                if((deltaTX_prev - deltaTx) < 50)
+////                    start_detecting = true;
+////
+////                if(start_detecting)
+////                    tv.setText(getFriendlyUsage(deltaTx, deltaRx));
+//
+//                // TODO: change to a longer time but can leave at 1 second while building app
+//                timerHandler.postDelayed(this, 1000);
+//            }
+//        };
+//
+//        // this actually starts the updater
+//        timerHandler.post(updater);
     }
 
     public void onClickStop(View view) {
