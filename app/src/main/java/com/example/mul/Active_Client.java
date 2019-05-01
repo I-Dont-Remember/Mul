@@ -11,6 +11,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 import okhttp3.Call;
@@ -37,12 +40,12 @@ public class Active_Client extends AppCompatActivity {
         MainActivity.connected = true;
 
         final TextView tv = findViewById(R.id.stats);
-        tv.post(new Runnable() {
-            @Override
-            public void run() {
-                tv.setText(getFriendlyUsage(0,0));
-            }
-        });
+//        tv.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                tv.setText(getFriendlyUsage(0,0));
+//            }
+//        });
 
         updater = new Runnable() {
             @Override
@@ -58,7 +61,7 @@ public class Active_Client extends AppCompatActivity {
                 deltaRX_prev += deltaRx;
 
                 if(deltaRX_prev > threshold) {
-                    deltaRX_prev = 0;
+                    deltaRX_prev -= threshold;
                     MulAPI.post_mulchunk(new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {
@@ -73,7 +76,8 @@ public class Active_Client extends AppCompatActivity {
                                 Active_Client.this.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(Active_Client.this, "Provider data limit reached, have to disconnect", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(Active_Client.this,
+                                                "Provider data limit reached, have to disconnect", Toast.LENGTH_SHORT).show();
                                     }
                                 });
                                 onClickDisconnect(null);
@@ -82,7 +86,45 @@ public class Active_Client extends AppCompatActivity {
                     });
                 }
 
-                tv.setText(getFriendlyUsage(deltaTx, deltaRx));
+                MulAPI.get_user(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.i(TAG, "Failed to get data usage.");
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        if(response.isSuccessful()){
+                            String jsonStr = response.body().string();
+                            try {
+                                JSONObject obj = new JSONObject(jsonStr);
+                                String id = obj.getString("id");
+                                int dataProvided = 0;
+                                int limit = 0;
+                                if (!id.equals("")) {
+                                    // user actually exists
+                                    dataProvided = obj.getInt("data_used");
+                                }
+
+                                final int finalUsed = dataProvided;
+
+                                Active_Client.this.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        tv.setText(String.format("Data Used: %s", formatDataUsed(finalUsed)));
+                                    }
+                                });
+                            } catch (JSONException e) {
+                                Log.d(TAG, "failed parsing JSON from API");
+                                return;
+                            }
+                        }
+                        else{
+                            Log.i(TAG, "Failed to get response.");
+                        }
+                    }
+                });
+
 
                 // TODO: change to a longer time but can leave at 1 second while building app
                 timerHandler.postDelayed(this, 1000);
@@ -120,7 +162,7 @@ public class Active_Client extends AppCompatActivity {
     // TODO: ahhhh don't hate me these are copied directly from Provider, they need to be abstracted to atone for this shameful behaviour
     private String formatDataUsed(long dataUsed) {
         if (dataUsed > (1024*1024)) {
-            return String.format("%d.%d MB", dataUsed / (1024*1024), dataUsed % 1024*1024);
+            return String.format("%d.%d MB", dataUsed / (1024*1024), dataUsed % (1024*1024));
         } else if (dataUsed > 1024) {
             return String.format("%d KB", dataUsed / 1024);
         } else {
@@ -128,9 +170,9 @@ public class Active_Client extends AppCompatActivity {
         }
     }
 
-    private String getFriendlyUsage(long tx, long rx) {
-        return String.format("deltaTx: %s deltaRx: %s", formatDataUsed(tx), formatDataUsed(rx));
-    }
+//    private String getFriendlyUsage(long tx, long rx) {
+//        return String.format("deltaTx: %s deltaRx: %s", formatDataUsed(tx), formatDataUsed(rx));
+//    }
 
     @Override
     public void onDestroy() {
