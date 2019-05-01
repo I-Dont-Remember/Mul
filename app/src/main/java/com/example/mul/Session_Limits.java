@@ -77,6 +77,7 @@ public class Session_Limits extends AppCompatActivity {
 
     public void onClickSave(View v){
         saveUserData();
+        finish();
     }
 
     // ****************** private helper functions ***************************//
@@ -134,7 +135,7 @@ public class Session_Limits extends AppCompatActivity {
 
         String saved_info = data_limit + " " + MB_or_GB;
 
-        MulAPI.post_limit(getApplicationContext(), saved_info, new Callback() {
+        MulAPI.post_limit(saved_info, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.d(TAG, "failed internetting somehow");

@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	MulChunkSizeKB = 100
+	MulChunkSizeKB = 20
 )
 
 // trying to use dependency injection, it worked for my API but seems flawed in that if your interface has a lot of methods,
@@ -82,11 +82,11 @@ func (db Dynamo) AddMulChunk(clientID string, providerID string) (int, error) {
 	}
 
 	// attempt to update client and provider with new data chunk used
-	_, err = db.updateNumField("#PROVIDED", "data_provided", providerID, MulChunkSizeKB)
+	_, err = db.updateNumField("#PROVIDED", "data_provided", providerID, MulChunkSizeKB*1024)
 	if err != nil {
 		return -1, err
 	}
-	dataUsed, err := db.updateNumField("#USED", "data_used", clientID, MulChunkSizeKB)
+	dataUsed, err := db.updateNumField("#USED", "data_used", clientID, MulChunkSizeKB*1024)
 	if err != nil {
 		return -1, err
 	}

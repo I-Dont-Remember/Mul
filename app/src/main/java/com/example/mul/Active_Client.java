@@ -2,12 +2,20 @@ package com.example.mul;
 
 import android.content.Intent;
 import android.net.TrafficStats;
+import android.nfc.tech.MifareUltralight;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 public class Active_Client extends AppCompatActivity {
     // TODO: this is same as Provider, is there anyway to abstract all this crap?
@@ -18,7 +26,8 @@ public class Active_Client extends AppCompatActivity {
 
     private String TAG = ClientActivity.class.getSimpleName();
 
-    private long deltaRX_prev;
+    private long deltaRX_prev = 0;
+    private long threshold = 15*1024;
     private boolean start_detecting = false;
 
     @Override
@@ -46,15 +55,36 @@ public class Active_Client extends AppCompatActivity {
                 long deltaTx = currentTx - sessionStartTxBytes;
                 long deltaRx = currentRx - sessionStartRxBytes;
 
-//                if((deltaRX_prev - deltaRx) < 50)
-//                    start_detecting = true;
+                deltaRX_prev += deltaRx;
 
-//                if(start_detecting)
-                    tv.setText(getFriendlyUsage(deltaTx, deltaRx));
+                if(deltaRX_prev > threshold) {
+                    deltaRX_prev = 0;
+                    MulAPI.post_mulchunk(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            Log.d(TAG, "failed trying to internet");
+                            e.printStackTrace();
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            if (response.isSuccessful()) {
+                            } else {
+                                Active_Client.this.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(Active_Client.this, "Provider data limit reached, have to disconnect", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                onClickDisconnect(null);
+                            }
+                        }
+                    });
+                }
+
+                tv.setText(getFriendlyUsage(deltaTx, deltaRx));
 
                 // TODO: change to a longer time but can leave at 1 second while building app
-                deltaRX_prev = deltaRx;
-
                 timerHandler.postDelayed(this, 1000);
             }
         };
@@ -77,6 +107,7 @@ public class Active_Client extends AppCompatActivity {
 //            BTService.stop();
 //        }
         ClientActivity.common.forgetCurrentNetwork(getApplicationContext());
+        MainActivity.connected = false;
 
         finish();
     }

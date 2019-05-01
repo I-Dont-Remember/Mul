@@ -6,6 +6,8 @@ import android.telephony.TelephonyManager;
 import android.text.TextPaint;
 import android.util.Log;
 
+import com.android.dx.command.Main;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,10 +28,10 @@ public class MulAPI {
             = MediaType.parse("application/json; charset=utf-8");
 
 
-    private static String getUid(Context c) {
-        return Settings.Secure.getString(c.getContentResolver(),
-                Settings.Secure.ANDROID_ID);
-    }
+//    private static String getUid(Context c) {
+//        return Settings.Secure.getString(c.getContentResolver(),
+//                Settings.Secure.ANDROID_ID);
+//    }
 
     private static void post(String path, String json, Callback c) {
         RequestBody body = RequestBody.create(JSON, json);
@@ -56,16 +58,18 @@ public class MulAPI {
 
 
     // used by client and provider
-    public  static void get_user(Context context, Callback c){
-        String uid = getUid(context);
+    public  static void get_user(Callback c){
+//        String uid = getUid(context);
+        String uid = MainActivity.IMEINumber;
         String path = "/user/" + uid;
         Log.d(TAG, "requesting user");
         get(path, c);
     }
 
     // used by provider
-    public static void post_limit(Context context, String limit, Callback c){
-        String uid = getUid(context);
+    public static void post_limit(String limit, Callback c){
+//        String uid = getUid(context);
+        String uid = MainActivity.IMEINumber;
         String path = "/user/" + uid + "/limit";
         String[] data_values = limit.split(" ");
         int data_limit;
@@ -85,8 +89,9 @@ public class MulAPI {
     }
 
     // used by client
-    public static void post_balance(Context context, int balance, Callback c){
-        String uid = getUid(context);
+    public static void post_balance(int balance, Callback c){
+        //        String uid = getUid(context);
+        String uid = MainActivity.IMEINumber;
         String path = "/user/" + uid + "/balance";
 
         JSONObject obj = new JSONObject();
@@ -99,13 +104,15 @@ public class MulAPI {
     }
 
     // used by client
-    public static void post_mulchunk(Context context, String providerID, Callback c){
-        String uid = getUid(context);
+    public static void post_mulchunk(Callback c){
+        Log.i(TAG, "requesting mulchunk");
+        //        String uid = getUid(context);
+        String uid = MainActivity.IMEINumber;
         String path = "/user/" + uid + "/mulchunk";
 
         JSONObject obj = new JSONObject();
         try {
-            obj.put("provider_id", providerID);
+            obj.put("provider_id", ClientActivity.IMEI_Provider);
         } catch (JSONException e) {
             e.printStackTrace();
         }

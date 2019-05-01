@@ -42,84 +42,57 @@ public class Active_Provider extends AppCompatActivity {
         TextView providedView = findViewById(R.id.dataProvided);
         TextView tv = findViewById(R.id.stats);
 
-        // check api for user info
-        MulAPI.get_user(getApplicationContext(), new Callback() {
+        updater = new Runnable() {
             @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d(TAG, "interneting failed somehow");
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String jsonStr = response.body().string();
-                try {
-                    JSONObject obj = new JSONObject(jsonStr);
-                    String id = obj.getString("id");
-                    int centsBalance = 0;
-                    int dataUsed = 0;
-                    int dataProvided = 0;
-                    int limit = 0;
-                    if (!id.equals("")) {
-                        // user actually exists
-                        centsBalance = obj.getInt("cents_balance");
-                        dataUsed = obj.getInt("data_used");
-                        dataProvided = obj.getInt("data_provided");
-                        limit = obj.getInt("limit");
+            public void run() {
+                // check api for user info
+                MulAPI.get_user(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.d(TAG, "interneting failed somehow");
                     }
 
-                    final int finalLimit = limit;
-                    final int finalProvided = dataProvided;
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        String jsonStr = response.body().string();
+                        try {
+                            JSONObject obj = new JSONObject(jsonStr);
+                            String id = obj.getString("id");
+                            int dataProvided = 0;
+                            int limit = 0;
+                            if (!id.equals("")) {
+                                // user actually exists
+                                dataProvided = obj.getInt("data_provided");
+                                limit = obj.getInt("limit");
+                            }
 
-                    Active_Provider.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            tv.setText(String.format("%d", finalProvided));
-                            providedView.setText(String.format("%d", finalProvided));
-                            limitView.setText(String.format("%d", finalLimit));
-                        }
-                    });
+                            final int finalLimit = limit;
+                            final int finalProvided = dataProvided;
+
+                            Active_Provider.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    tv.setText(String.format("Data Provided: %s", formatDataUsed(finalProvided)));
+                                }
+                            });
 
 
 //                    balanceView.setText(String.format("%d", centsBalance));
 //                    dataUsedView.setText(String.format("%d", dataUsed));
 
-                } catch (JSONException e) {
-                    Log.d(TAG, "failed parsing JSON from API");
-                    return;
-                }
-            };
-        });
+                        } catch (JSONException e) {
+                            Log.d(TAG, "failed parsing JSON from API");
+                            return;
+                        }
+                    };
+                });
 
-//        // makes the assumption that once hotspot is on, Wifi is off and all traffic is through mobile network.
-//        // The provider can still use phone though, so that will throw off traffic readings versus actual client usage.
-//        sessionStartRxBytes = TrafficStats.getMobileRxBytes();
-//        sessionStartTxBytes = TrafficStats.getMobileTxBytes();
-//        Log.i(TAG, String.format("startRx: %d startTx: %d", sessionStartRxBytes, sessionStartTxBytes));
-//
-//        updater = new Runnable() {
-//            @Override
-//            public void run() {
-//                TextView tv = findViewById(R.id.stats);
-//                long currentTx = TrafficStats.getMobileTxBytes();
-//                long currentRx = TrafficStats.getMobileRxBytes();
-//                Log.i(TAG, String.format("currentTx: %d currentRx: %d", currentTx, currentRx));
-//                Log.i(TAG, String.format("startTx: %d startRx: %d", sessionStartTxBytes, sessionStartRxBytes));
-//                long deltaTx = currentTx - sessionStartTxBytes;
-//                long deltaRx = currentRx - sessionStartRxBytes;
-//
-////                if((deltaTX_prev - deltaTx) < 50)
-////                    start_detecting = true;
-////
-////                if(start_detecting)
-////                    tv.setText(getFriendlyUsage(deltaTx, deltaRx));
-//
-//                // TODO: change to a longer time but can leave at 1 second while building app
-//                timerHandler.postDelayed(this, 1000);
-//            }
-//        };
+                timerHandler.postDelayed(this, 3000);
+            }
+        };
 //
 //        // this actually starts the updater
-//        timerHandler.post(updater);
+        timerHandler.post(updater);
     }
 
     public void onClickStop(View view) {
@@ -169,7 +142,7 @@ public class Active_Provider extends AppCompatActivity {
 
     private String formatDataUsed(long dataUsed) {
         if (dataUsed > (1024*1024)) {
-            return String.format("%d.%d MB", dataUsed / (1024*1024), dataUsed % 1024*1024);
+            return String.format("%d.%d MB", dataUsed / (1024*1024), dataUsed % (1024*1024));
         } else if (dataUsed > 1024) {
             return String.format("%d KB", dataUsed / 1024);
         } else {
@@ -205,45 +178,5 @@ public class Active_Provider extends AppCompatActivity {
             deltaRx = currentRx - sessionStartRxBytes;
 
         }
-//        tv.setText(String.format("DeltaTx: %s DeltaRx: %s", getFriendlyFormat(), deltaRx));
     }
-
-
-    // Initial tracking, seems like there's a weirdly large amount of data right away then after a bit it trails off to almost no change as one might have expected for the entire duration
-//    2019-04-11 11:49:14.878 29302-29302/com.example.mul I/ProviderActivity: clicked provide
-//    2019-04-11 11:49:14.903 29302-29302/com.example.mul I/ProviderActivity: startRx: 44942294 startTx: 4495290
-//    2019-04-11 11:49:14.917 29302-29302/com.example.mul I/HotSpotIntentReceiver: Received intent with action: com.example.mul.TURN_ON
-//    2019-04-11 11:49:14.929 29302-29302/com.example.mul I/MagicActivity: attempting to turn off hotspot
-//    2019-04-11 11:49:15.043 29302-29302/com.example.mul W/ActivityThread: handleWindowVisibility: no activity for token android.os.BinderProxy@afad04d
-//    2019-04-11 11:49:15.065 29302-29302/com.example.mul I/PermissionsActivity: settingPermissions
-//    2019-04-11 11:49:15.066 29302-29302/com.example.mul I/PermissionsActivity: location permssion
-//    2019-04-11 11:49:15.078 29302-29302/com.example.mul I/MagicActivity: onCreate
-//    2019-04-11 11:49:15.118 29302-29512/com.example.mul I/ContentValues: Received start intent
-//    2019-04-11 11:49:15.118 29302-29512/com.example.mul I/ContentValues: Action/data to turn on hotspot
-//    2019-04-11 11:49:15.121 29302-29512/com.example.mul I/MyOreoWifiManager: starting tethering
-//    2019-04-11 11:49:15.123 29302-29512/com.example.mul I/CallbackMaker: in constructor
-//    2019-04-11 11:49:15.139 29302-29512/com.example.mul I/CallbackMaker: trying to generate constructor
-//    2019-04-11 11:49:15.558 29302-29512/com.example.mul I/com.example.mu: The ClassLoaderContext is a special shared library.
-//    2019-04-11 11:49:15.566 29302-29512/com.example.mul I/ConnectivityManager: startTethering caller:com.example.mul
-//    2019-04-11 11:49:17.371 29302-29302/com.example.mul I/ProviderActivity: currentTx: 7262672 currentRx: 50391178
-//    2019-04-11 11:49:17.372 29302-29302/com.example.mul I/ProviderActivity: startTx: 4495290 startRx: 44942294
-//    2019-04-11 11:49:28.842 29302-29302/com.example.mul I/ProviderActivity: currentTx: 7730001 currentRx: 50809257
-//    2019-04-11 11:49:28.843 29302-29302/com.example.mul I/ProviderActivity: startTx: 4495290 startRx: 44942294
-//    2019-04-11 11:49:35.305 29302-29302/com.example.mul I/ProviderActivity: currentTx: 7730001 currentRx: 50809257
-//    2019-04-11 11:49:35.306 29302-29302/com.example.mul I/ProviderActivity: startTx: 4495290 startRx: 44942294
-//    2019-04-11 11:49:38.513 29302-29302/com.example.mul I/ProviderActivity: currentTx: 7730001 currentRx: 50809257
-//    2019-04-11 11:49:38.513 29302-29302/com.example.mul I/ProviderActivity: startTx: 4495290 startRx: 44942294
-//    2019-04-11 11:49:40.228 29302-29302/com.example.mul I/ProviderActivity: currentTx: 7733014 currentRx: 50810894
-//    2019-04-11 11:49:40.229 29302-29302/com.example.mul I/ProviderActivity: startTx: 4495290 startRx: 44942294
-//    2019-04-11 11:49:42.873 29302-29302/com.example.mul I/ProviderActivity: currentTx: 7735745 currentRx: 50815975
-//    2019-04-11 11:49:42.874 29302-29302/com.example.mul I/ProviderActivity: startTx: 4495290 startRx: 44942294
-//    2019-04-11 11:49:43.931 29302-29302/com.example.mul I/ProviderActivity: currentTx: 7735745 currentRx: 50815975
-//    2019-04-11 11:49:43.932 29302-29302/com.example.mul I/ProviderActivity: startTx: 4495290 startRx: 44942294
-//    2019-04-11 11:50:04.972 29302-29302/com.example.mul I/ProviderActivity: currentTx: 7735745 currentRx: 50815975
-//    2019-04-11 11:50:04.973 29302-29302/com.example.mul I/ProviderActivity: startTx: 4495290 startRx: 44942294
-//    2019-04-11 11:51:27.346 29302-29302/com.example.mul I/ProviderActivity: currentTx: 7741947 currentRx: 50818400
-//    2019-04-11 11:51:27.347 29302-29302/com.example.mul I/ProviderActivity: startTx: 4495290 startRx: 44942294
-// From 49:17 to 51:27 = 110s
-// TX: 7741947 - 7262672 ~  480000 480KB avg ~ 5KB/s
-// RX: 50818400 - 50391178 ~ 430000 430KB avg ~ 4KB/s
 }

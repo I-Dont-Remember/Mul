@@ -78,6 +78,58 @@ public class ProviderActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_provider);
 
+        TextView limitView = findViewById(R.id.limit);
+        TextView providedView = findViewById(R.id.dataProvided);
+
+        // check api for user info
+        MulAPI.get_user(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.d(TAG, "interneting failed somehow");
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        String jsonStr = response.body().string();
+                        try {
+                            JSONObject obj = new JSONObject(jsonStr);
+                            String id = obj.getString("id");
+                            int centsBalance = 0;
+                            int dataUsed = 0;
+                            int dataProvided = 0;
+                            int limit = 0;
+                            if (!id.equals("")) {
+                                // user actually exists
+                                centsBalance = obj.getInt("cents_balance");
+                                dataUsed = obj.getInt("data_used");
+                                dataProvided = obj.getInt("data_provided");
+                                limit = obj.getInt("limit");
+                            }
+
+                            final int finalLimit = limit;
+                            final int finalProvided = dataProvided;
+
+                            ProviderActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    providedView.setText(String.format("%d", finalProvided));
+                                    limitView.setText(String.format("%d", finalLimit));
+                                }
+                            });
+
+
+//                    balanceView.setText(String.format("%d", centsBalance));
+//                    dataUsedView.setText(String.format("%d", dataUsed));
+
+                        } catch (JSONException e) {
+                            Log.d(TAG, "failed parsing JSON from API");
+                            return;
+                        }
+                    }
+
+                    ;
+                });
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 

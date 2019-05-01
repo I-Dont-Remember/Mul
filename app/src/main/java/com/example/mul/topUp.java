@@ -28,7 +28,7 @@ public class topUp extends AppCompatActivity {
 
         int cents = Integer.parseInt(dollarsEdit.getText().toString()) * 100;
 
-        MulAPI.post_balance(getApplicationContext(), cents, new Callback() {
+        MulAPI.post_balance(cents, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.d(TAG, "failed using internets");

@@ -68,7 +68,7 @@ public class ClientActivity extends AppCompatActivity {
         TextView dataUsedView = findViewById(R.id.dataUsed);
 
         // check api for user info
-        MulAPI.get_user(getApplicationContext(), new Callback() {
+        MulAPI.get_user(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.d(TAG, "interneting failed somehow");
